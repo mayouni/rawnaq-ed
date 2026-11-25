@@ -33,7 +33,7 @@ var SAMPLES = [
 if (typeof window !== 'undefined' && window.RE) window.RE.vizSamples = SAMPLES;
 if (typeof module !== 'undefined' && require.main === module) {
   process.argv[2] = '__none__';
-  require('../../tools/check-content.js');
+  require('../../../tools/check-content.js');
   var RE = global.RE, n0 = RE.checkErrs.length;
   SAMPLES.forEach(function (v, i) { if (v.groups === null) delete v.groups; RE.tryViz('sample ' + i + ' ' + v.k, v); });
   console.log(RE.checkErrs.slice(n0).join('\n') || 'all ' + SAMPLES.length + ' samples draw');

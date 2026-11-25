@@ -54,7 +54,7 @@
     w.appendChild(road);
     foot(w);
   }
-  function foot(w) { w.appendChild(el('footer', {}, 'رونق · رياضيات — على برنامج السنة السابعة من التعليم الأساسي وبترتيب كتابه الرسميّ. التمارين مكتوبة على منواله بأعداد مغايرة. كلّ ما تفعل[ينه|ه] هنا يبقى على هذا الجهاز.'.replace(/\[([^|]*)\|([^\]]*)\]/, function (_, f, m) { return RE.state.fem ? f : m; }))); }
+  function foot(w) { w.appendChild(el('footer', {}, 'رونق · رياضيات — على برنامج السنة السابعة من التعليم الأساسي وبترتيب كتابه الرسميّ. التمارين مكتوبة على منواله بأعداد مغايرة. كلّ ما تفعل[ينه|ه] هنا يبقى على هذا الجهاز.'.replace(/\[([^|]*)\|([^\]]*)\]/, function (_, f, m) { return RE.state.fem ? f : m; }) + (window.RENative ? '' : ' <a href="../index.html">عن المنصّة</a>'))); }
 
   /* ---------------- slides ----------------
      A station is played one screen at a time: the text or the exercise on one half, its drawing on the other.
