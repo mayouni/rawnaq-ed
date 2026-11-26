@@ -23,7 +23,7 @@
       run: function (x) { var a = nums(x, 2), g = N.gcd(a[0], a[1]); if (!g) throw 'عددان مخالفان للصفر من فضلك.'; return 'ق.م.أ (' + L(a[0] + ' ; ' + a[1]) + ') = ' + g + (g === 1 ? '   ← أوّليّان فيما بينهما' : ''); } },
     { names: ['ممأ', 'م.م.أ', 'مما'], eg: 'ممأ 4 6', stz: function (a) { return 'Q(' + a[0] + ').LCM(' + a[1] + ')'; }, help: 'المضاعف المشترك الأصغر',
       run: function (x) { var a = nums(x, 2); if (!a[0] || !a[1]) throw 'عددان مخالفان للصفر من فضلك.'; return 'م.م.أ (' + L(a[0] + ' ; ' + a[1]) + ') = ' + N.lcm(a[0], a[1]); } },
-    { names: ['مضاعفات'], eg: 'مضاعفات 7', stz: function (a) { return 'Q(' + a[0] + ').Multiples(12)'; }, help: 'أوّل مضاعفات عدد',
+    { names: ['مضاعفات'], eg: 'مضاعفات 7', stz: function (a) { return 'Q(' + a[0] + ').MultiplesUnder(' + a[0] * 12 + ')'; }, help: 'أوّل مضاعفات عدد',
       run: function (x) { var a = nums(x, 1); return N.multiples(a[0], 12).join(' ; ') + ' ; ...'; } },
     { names: ['قسمة'], eg: 'قسمة 203 15', stz: function (a) { return 'Q(' + a[0] + ').IsDivisibleBy(' + a[1] + ')'; }, help: 'القسمة الإقليديّة: الخارج والباقي',
       run: function (x) { var a = nums(x, 2); if (!a[1]) throw 'لا نقسم على صفر.'; var q = Math.floor(a[0] / a[1]), r = a[0] % a[1]; return L(a[0] + ' = ' + a[1] + ' × ' + q + ' + ' + r) + (r ? '' : '   ← ' + a[1] + ' قاسم لـ ' + a[0]); } },

@@ -147,6 +147,7 @@
     top.appendChild(el('a', { class: 'back', href: c.exit || '#/', 'aria-label': 'الرجوع إلى الطريق' }, '→ الطريق'));
     top.appendChild(el('div', { class: 'stage-title' }, (c.icon || '') + '<b>' + c.title + '</b>'));
     if (c.pills) { var pills = el('div', { class: 'steps' }); c.pills.forEach(function (p) { pills.appendChild(el('a', { href: c.href(p.at), class: (!isEnd && sl.beat === p.beat ? 'on ' : '') + (p.seen ? 'seen' : ''), tabindex: RE.isTv ? -1 : 0 }, p.label)); }); top.appendChild(pills); }
+    if (c.aicha) top.appendChild(el('a', { class: 'back aicha-btn', href: c.aicha, 'aria-label': 'اسألي عايشة' }, RE.aichaFace + ' عايشة'));
     top.appendChild(el('div', { class: 'stage-stars', title: 'نجومي' }, '★ <span data-stars>' + RE.totalStars() + '</span>'));
     st.appendChild(top);
 
@@ -221,7 +222,7 @@
     }
     var firstOf = {}; slides.forEach(function (x, i) { if (firstOf[x.beat] == null) firstOf[x.beat] = i; });
     stage({
-      key: 'st:' + id, station: s, title: RE.g(s.title).replace(/`/g, ''), icon: icon(s, 34), slides: slides,
+      key: 'st:' + id, station: s, aicha: '#/lab/s/' + id, title: RE.g(s.title).replace(/`/g, ''), icon: icon(s, 34), slides: slides,
       href: function (k) { return '#/s/' + id + '/' + k; },
       pills: s.beats.map(function (b, i) { return { beat: i, at: firstOf[i] || 0, label: RE.g(b.label || KIND[b.kind]), seen: sn.indexOf(i) >= 0 }; }).filter(function (p) { return firstOf[p.beat] != null; }),
       kindLabel: function (sl) { var b = s.beats[sl.beat]; return '<span class="tag ' + KTAG[b.kind] + '">' + RE.g(b.label || KIND[b.kind]) + '</span> <span>' + t(b.title) + '</span>'; },
@@ -292,44 +293,7 @@
   }
 
   /* ---------------- lab ---------------- */
-  function lab() {
-    setNav('lab'); var w = page('المختبر');
-    w.appendChild(el('div', { class: 'hello' }, '<h1>المختبر</h1><p>' + t('هنا الحاسوب يحسب وأنت[ِ] تسأل[ين]. اطرح[ي] سؤالاً، انظر[ي] إلى الجواب، ثمّ اسأل[ي]: لماذا؟ وماذا لو غيّرتُ العدد؟ هكذا يعمل الرياضيّون اليوم.') + '</p></div>'));
-    var card = el('div', { class: 'card' }), cmds = el('div', { class: 'cmds' }), con = el('div', { class: 'console', 'aria-live': 'polite' }), line = el('div', { class: 'cmdline' });
-    var inp = el('input', { type: 'text', placeholder: 'مثلاً: قواسم 36', 'aria-label': 'الأمر', autocomplete: 'off' }), go = el('button', { class: 'btn', type: 'button' }, 'نفّذ');
-    /* with the pad: choose a command, then type its numbers on Rawnaq's own keys */
-    var cur = null, slot = null;
-    if (RE.usePad) { slot = el('button', { type: 'button', class: 'ans slot wide', 'data-spec': 'lab', value: '', 'aria-label': 'الأعداد' }, '&nbsp;'); slot._done = function () { go.click(); }; }
-    function run(s) {
-      var r = RE.labRun(s); if (!r) return;
-      if (!RE.state.labbed) { RE.state.labbed = RE.today(); RE.save(); RE.checkBadges(); }
-      RE.fx('page');
-      con.appendChild(el('div', { class: 'in' }, '‹ ' + s.replace(/</g, '&lt;')));
-      con.appendChild(el('div', { class: 'out' + (r.err ? ' ar' : '') }, r.err ? RE.g(r.err) : r.out));
-      if (r.stz) con.appendChild(el('div', { class: 'out', style: 'opacity:.55;font-size:13px;font-family:Consolas,monospace' }, 'Softanza: ' + r.stz));
-      con.scrollTop = con.scrollHeight;
-      if (slot) { slot.value = ''; slot.innerHTML = '&nbsp;'; } else { inp.value = ''; inp.focus(); }
-    }
-    var who = el('div', { class: 'lab-who' }, RE.g('[اختاري|اختر] أمراً من الأزرار، ثمّ اكتب[ي] أعداده.'));
-    RE.labCommands.forEach(function (c) {
-      var b = el('button', { class: 'choice', type: 'button', title: c.help }, slot ? c.names[0] : c.eg);
-      b.addEventListener('click', function () {
-        if (!slot) { run(c.eg); return; }
-        cur = c; [].forEach.call(cmds.children, function (x) { x.classList.toggle('sel', x === b); }); who.innerHTML = c.names[0] + ' <span class="muted">(' + c.help + ' · مثال: ' + c.eg + ')</span>'; RE.pad.open(slot);
-      });
-      cmds.appendChild(b);
-    });
-    go.addEventListener('click', function () { if (slot) { if (cur && slot.value) run(cur.names[0] + ' ' + slot.value.replace(/;/g, ' ')); } else run(inp.value); });
-    inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') run(inp.value); });
-    con.appendChild(el('div', { class: 'out ar', style: 'opacity:.7' }, RE.g(slot ? 'المس[ي] أمراً، اكتب[ي] عدده، ثمّ «تمّ».' : 'المس[ي] مثالاً، أو اكتب[ي] أمراً وغيّر[ي] أعداده.')));
-    if (slot) { line.appendChild(who); line.appendChild(slot); } else line.appendChild(inp);
-    line.appendChild(go); card.appendChild(cmds); card.appendChild(con); card.appendChild(line); w.appendChild(card);
-    var ideas = el('div', { class: 'card tint' }, '<h3>أسئلة تستحقّ البحث</h3>');
-    ['ما أصغر عدد له بالضبط `10` قواسم؟ جرّب[ي] بالأمر «قواسم».', 'اطلب[ي] «أوليات 100» ثمّ «أوليات 200»: هل الأعداد الأوّليّة تكثر أم تقلّ كلّما كبرت الأعداد؟', '[اختاري|اختر] عددين واحسب[ي] «قمأ» و «ممأ» لهما، ثمّ اضرب[ي] النتيجتين. قارن[ي] مع جذاء العددين. هل هي صدفة؟ جرّب[ي] أزواجاً أخرى.', 'فكّك[ي] `1001` ثمّ `1001 × 1001`. ماذا يحدث للدلائل؟']
-      .forEach(function (x) { ideas.appendChild(el('p', {}, '• ' + t(x))); });
-    w.appendChild(ideas);
-    w.appendChild(el('p', { class: 'muted' }, 'تحت كلّ جواب يظهر السطر الذي يحمل المعنى نفسه في مكتبة Softanza، اللغة التي تُبنى عليها رونق.'));
-  }
+  function lab(mode, arg) { setNav('lab'); var w = page('المختبر'); RE.labPage(w, mode, arg); }
 
   /* ---------------- guardian ---------------- */
   function guardian() {
@@ -443,7 +407,7 @@
     else if (h[0] === 'review') review(h[1] == null ? null : Number(h[1]));
     else if (h[0] === 'viz') gallery(h[1]);
     else if (h[0] === 'notebook') notebook();
-    else if (h[0] === 'lab') lab();
+    else if (h[0] === 'lab') lab(h[1], h[2]);
     else if (h[0] === 'guardian') guardian();
     else if (h[0] === 'selftest') selftest();
     else home();

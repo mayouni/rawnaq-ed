@@ -126,11 +126,61 @@
   </div>
   <div class="btns"><a class="btn" href="math7/index.html">ادخل الدرس</a><a class="btn white" href="method.html">الأسلوب بالتفصيل</a></div>
 </div></section>
+
+<section class="tint" id="contact"><div class="wrap">
+  <span class="tag blue">راسلنا</span>
+  <h2>ملاحظتك تغيّر الدرس القادم</h2>
+  <p class="lead">تمرين غامض، رسم لا يُري ما يجب، خطأ في حساب، أو درس تريده قبل غيره: اكتبه لنا. كلّ ملاحظة تُقرأ، وما يُصلَح يُذكر في صفحة «التمشّي».</p>
+  <div class="grid g2" style="margin-top:26px">
+    <div class="card">
+      <h3>اكتب ملاحظة</h3>
+      <p>الملاحظات تُكتب في دفتر المشروع المفتوح على GitHub، حيث يراها الجميع ويُجاب عنها علناً. يلزمك حساب GitHub، وهو مجاني.</p>
+      <p style="color:var(--ink2);font-size:17px">الدفتر عامّ: اكتب عن التمرين، ولا تكتب اسم طفلك ولا مدرسته.</p>
+      <div class="btns"><a class="btn" href="https://github.com/mayouni/rawnaq-ed/issues/new" rel="noopener">اكتب ملاحظة</a><a class="btn white" href="https://github.com/mayouni/rawnaq-ed/issues" rel="noopener">اقرأ الملاحظات</a></div>
+    </div>
+    <div class="card">
+      <h3>ماذا تكتب فيها</h3>
+      <ul class="ticks">
+        <li><b>أين:</b> اسم المحطّة، ونصّ التمرين أو صورة لشاشته.</li>
+        <li><b>ماذا رأيت:</b> ما الذي لم يُفهم، أو ما الذي بدا خطأ.</li>
+        <li><b>على أيّ جهاز:</b> تلفاز، هاتف، لوحة أو حاسوب.</li>
+      </ul>
+    </div>
+  </div>
+  <form class="trial card" id="mailForm" style="margin-top:26px" hidden>
+    <h3>أو راسلنا بالبريد</h3>
+    <label>أنا
+      <select name="role"><option>وليّ</option><option>معلّمة أو معلّم</option><option>تلميذة أو تلميذ</option><option>مدرسة أو مركز تكوين</option></select>
+    </label>
+    <label>المحطّة والتمرين
+      <input name="where" inputmode="text" placeholder="مثلاً: القواسم، تمرين البلاطات">
+    </label>
+    <label>الملاحظة
+      <input name="note" inputmode="text">
+    </label>
+    <div><button class="btn" type="submit">افتح بريدي</button></div>
+  </form>
+</div></section>
 </main>
 
 <footer><div class="wrap">
   <div><b>رونق للتعلّم</b> · الجانب التعليميّ من رونق · مشروع من منظومة Softanza.</div>
   <div><a href="why.html">لماذا؟</a> · <a href="method.html">الأسلوب</a> · <a href="journey.html">التمشّي</a> · <a href="guardians.html">للأولياء والمعلّمين</a></div>
 </div></footer>
+<script src="js/config.js"></script>
+<script>
+/* The note leaves by the writer's own mail program, to the address set in js/config.js.
+   Nothing is sent from this page by itself, and nothing is stored. While no address is set, the form stays hidden. */
+(function () {
+  var f = document.getElementById('mailForm'), to = (window.RAWNAQ_ED || {}).contact;
+  if (!to) return;
+  f.hidden = false;
+  f.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var body = 'أنا: ' + f.role.value + '\nأين: ' + f.where.value + '\n\n' + f.note.value;
+    location.href = 'mailto:' + to + '?subject=' + encodeURIComponent('رونق للتعلّم: ملاحظة') + '&body=' + encodeURIComponent(body);
+  });
+})();
+</script>
 </body>
 </html>
