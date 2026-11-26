@@ -63,13 +63,20 @@
   }
   /* Zayn, «No Surprises»: a screen that was drawn smaller to hold something new is never drawn bigger again
      while it is on the glass: things appear, they do not make the others jump back and forth. */
+  /* the size of an exercise is chosen once, for the longest thing it can say under itself (a hint, a remark on
+     an error, the explanation): an answer then makes words appear and makes nothing else change size */
+  function worstFits(p) {
+    var ok = true;
+    [].forEach.call(p.querySelectorAll('.qbox'), function (b) { if (b._rehearse) b._rehearse(function () { if (p.scrollHeight > p.clientHeight + 2) ok = false; }); });
+    return ok;
+  }
   function fitPane(p, pad) {
     if (!p) return;
     var room = 0, open = pad && !pad.hidden && document.body.classList.contains('pad-on'); if (open) room = pad.offsetHeight + 6;
     busy = true;
     for (var i = p._zi || 0; i < STEPS.length; i++) {
       p.style.zoom = STEPS[i]; p.style.paddingBottom = room ? (room / STEPS[i]) + 'px' : ''; sizeDef(p);
-      if (p.scrollHeight <= p.clientHeight + 2) break;
+      if (p.scrollHeight <= p.clientHeight + 2 && (open || p._zi != null || worstFits(p))) break;
     }
     if (!open) p._zi = Math.min(i, STEPS.length - 1);
     p.scrollTop = 0;

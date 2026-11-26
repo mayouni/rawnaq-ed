@@ -51,7 +51,7 @@
     var lv = RE.level(), days = RE.streak(), nb = Object.keys(RE.state.badges).length;
     w.appendChild(el('a', { class: 'card levelcard', href: '#/notebook' }, '<div class="lv-n"><span>المستوى</span><b>' + lv.n + '</b></div><div class="lv-main"><b>' + lv.title + '</b>' +
       '<div class="meter big"><i style="width:' + Math.round(lv.part * 100) + '%"></i></div><span class="muted">' + (lv.to ? '<span class="m">★ ' + lv.stars + ' / ' + lv.to + '</span> نحو المستوى التالي' : '<span class="m">★ ' + lv.stars + '</span>') + '</span></div>' +
-      '<div class="lv-side"><span class="pill">📅 <span class="m">' + days + '</span> ' + (days === 1 ? 'يوم' : 'أيّام') + ' متتالية</span><span class="pill">🏅 <span class="m">' + nb + ' / ' + RE.badges.length + '</span> أوسمة</span></div>'));
+      '<div class="lv-side"><span class="pill">📅 <span class="m">' + days + '</span> ' + (days === 1 ? 'يوم' : 'أيّام') + ' عمل</span><span class="pill">🏅 <span class="m">' + nb + ' / ' + RE.badges.length + '</span> أوسمة</span></div>'));
     if (due.length) {
       var c = el('div', { class: 'card sky' }, '<span class="tag">مراجعة اليوم</span><h3 style="margin-top:8px">' + t(due.length + ' ' + (due.length > 10 ? 'سؤالاً' : 'أسئلة') + ' تنتظر أن تتذكّر[ي]ها') + '</h3><p class="muted">ما نسترجعه بعد أيّام يثبت في الذاكرة أكثر ممّا نعيده عشر مرّات في يوم واحد.</p>');
       c.appendChild(el('a', { class: 'btn sun', href: '#/review' }, 'أبدأ المراجعة')); w.appendChild(c);

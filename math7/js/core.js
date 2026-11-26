@@ -301,6 +301,20 @@
       again.addEventListener('click', function () { box.replaceWith(RE.question(q, Object.assign({}, opts, { fresh: true }))); });
       box.insertBefore(again, actions);
     }
+    /* Minwal, «nothing moves»: every sentence this exercise can say under itself is shown once, unseen, so that
+       the screen can keep room for the longest one from the start (tv.js) */
+    box._rehearse = function (measure) {
+      if (state.done) return;
+      var keep = [fb.hidden, fb.className, fb.innerHTML, showBtn.hidden], all = [], ex = q.explain ? '<br>' + q.explain : '';
+      (q.hints || []).forEach(function (h, i) { all.push('<b>تلميح ' + (i + 1) + ':</b> ' + h); });
+      (q.wrong || []).forEach(function (w) { if (typeof w.say === 'string') all.push(w.say); });
+      all.push(TRY[1]);
+      var end = ['<span class="stars">★★★</span> <b>تمام، هكذا بالضبط.</b>' + ex, '<span class="stars">★★★</span> ' + RE.g('هذا هو الحلّ. اقرأ[ي]ه بتمهّل، وسيعود هذا السؤال في المراجعة لتجرّب[ي]ه وحدك.') + ex];
+      showBtn.hidden = false; fb.hidden = false; fb.className = 'fb ok';
+      all.forEach(function (m) { fb.innerHTML = RE.t(m); measure(); });
+      end.forEach(function (m) { fb.innerHTML = RE.t(m); if (RE.afterAnswer) RE.afterAnswer(q, fb); measure(); });
+      fb.hidden = keep[0]; fb.className = keep[1]; fb.innerHTML = keep[2]; showBtn.hidden = keep[3];
+    };
     return box;
   };
 })();

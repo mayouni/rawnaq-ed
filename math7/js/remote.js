@@ -84,11 +84,21 @@
     return false;
   };
   /* each new screen starts with something chosen, so the first arrow press is never lost */
+  /* Minwal, navigation: a screen reached with «التالي» opens on «التالي», one reached with «السابق» opens on
+     «السابق»: walking on in the same direction never asks to change key */
+  var dir = null;
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('.stage-bot a, .stage-bot button, .stage .btn.next, .stage .prev');
+    dir = !b ? null : b.classList.contains('prev') ? 'prev' : b.classList.contains('next') ? 'next' : null;
+  }, true);
   RE.afterRender = function () {
     RE.pad.drop();
     if (RE.tvFit) RE.tvFit();
     if (RE.syncVoice) RE.syncVoice();
+    var d = dir; dir = null;
     setTimeout(function () {
+      var same = d && document.querySelector(d === 'prev' ? '.stage a.prev' : '.stage .btn.next') || (d === 'prev' && document.querySelector('.stage .btn.next'));
+      if (same && same.getClientRects().length) { same.focus({ preventScroll: true }); return; }
       var w = document.querySelector('.stage .pane.text .ans:not([disabled]), .stage .pane.text .choice, .stage .pane.text .chip, .stage .pane.text .term, .stage .pane.fig input[type=range], .stage .btn.next, #app .station.next, #app a.station, #app .btn');
       if (w && w.getClientRects().length) w.focus({ preventScroll: true }); else first();
     }, 30);

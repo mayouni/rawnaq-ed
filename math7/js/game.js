@@ -14,13 +14,9 @@
     var next = LEVELS[i + 1];
     return { n: i + 1, title: RE.g(LEVELS[i][1]), stars: s, from: LEVELS[i][0], to: next ? next[0] : null, part: next ? (s - LEVELS[i][0]) / (next[0] - LEVELS[i][0]) : 1 };
   };
-  /* days in a row with at least one solved question, counted back from today (or yesterday: the day is not over) */
-  RE.streak = function () {
-    var d = new Date(), n = 0, key = function (x) { return x.getFullYear() + '-' + ('0' + (x.getMonth() + 1)).slice(-2) + '-' + ('0' + x.getDate()).slice(-2); };
-    if (!RE.state.days[key(d)]) d.setDate(d.getDate() - 1);
-    while (RE.state.days[key(d)]) { n++; d.setDate(d.getDate() - 1); }
-    return n;
-  };
+  /* the days on which at least one question was solved. Counted, never «in a row»: a day without a lesson
+     takes nothing away (decision of 26 November 2026, docs/VISION.md section 9) */
+  RE.streak = function () { return Object.keys(RE.state.days || {}).filter(function (k) { return RE.state.days[k]; }).length; };
   function stationsDone() { return RE.stations.filter(function (s) { var st = RE.stationStats(s); return st.total > 0 && st.done === st.total; }).length; }
   var BADGES = RE.badges = [
     { id: 'first', icon: '✨', title: 'الخطوة الأولى', how: 'أوّل جواب صحيح', test: function () { return RE.totalStars() > 0; } },
@@ -33,8 +29,8 @@
     { id: 's50', icon: '⭐', title: 'خمسون نجمة', how: '50 نجمة', test: function () { return RE.totalStars() >= 50; } },
     { id: 's200', icon: '🌟', title: 'مئتا نجمة', how: '200 نجمة', test: function () { return RE.totalStars() >= 200; } },
     { id: 's500', icon: '💫', title: 'خمسمئة نجمة', how: '500 نجمة', test: function () { return RE.totalStars() >= 500; } },
-    { id: 'd3', icon: '📅', title: 'ثلاثة أيّام', how: 'عمل في ثلاثة أيّام متتالية', test: function () { return RE.streak() >= 3; } },
-    { id: 'd7', icon: '🗓️', title: 'أسبوع كامل', how: 'عمل في سبعة أيّام متتالية', test: function () { return RE.streak() >= 7; } },
+    { id: 'd3', icon: '📅', title: 'ثلاثة أيّام', how: 'عمل في ثلاثة أيّام', test: function () { return RE.streak() >= 3; } },
+    { id: 'd7', icon: '🗓️', title: 'سبعة أيّام', how: 'عمل في سبعة أيّام', test: function () { return RE.streak() >= 7; } },
     { id: 'rev', icon: '🔁', title: 'ذاكرة قويّة', how: 'مراجعة يوم كاملة', test: function () { return !!RE.state.reviewed; } },
     { id: 'make', icon: '🛠️', title: 'صانع[ة]', how: 'شيء من صنعك في الدفتر', test: function () { return RE.state.made.length > 0; } },
     { id: 'lab', icon: '🔬', title: 'في المختبر', how: 'أوّل سؤال تطرح[ينه|ه] على الحاسوب', test: function () { return !!RE.state.labbed; } },
