@@ -283,7 +283,7 @@
     }
     if (RE.usePad) { slot = el('button', { type: 'button', class: 'ans slot wide', 'data-spec': 'lab', value: '', 'aria-label': 'الأعداد' }, '&nbsp;'); slot._done = function () { go.click(); }; }
     /* her first words, and what can be asked here */
-    var hello = st ? 'أنت[ِ] في محطّة «' + RE.g(st.title) + '». عن أيّ كلمة منها [تسألين|تسأل]؟ أو جرّب[ي] عدداً.' : 'أهلاً' + (RE.state.name ? ' يا ' + RE.state.name : '') + '! اسأل[ي]ني عن عدد أو عن كلمة من دروسك. تحت كلّ جواب السطر الذي يسأل السؤال نفسه بلغة Softanza.';
+    var hello = st ? 'أنت[ِ] في محطّة «' + RE.g(st.title) + '». عن أيّ كلمة منها [تسألين|تسأل]؟ أو جرّب[ي] عدداً.' : 'أهلاً' + (RE.state.name ? ' يا ' + RE.state.name : '') + '! اسأل[ي]ني عن عدد أو عن كلمة من دروسك.';
     bubble(thread, 'her', RE.t(hello));
     if (st) kb().filter(function (e) { return e.st === st && e.kind === 'term'; }).slice(0, 6).forEach(function (e) {
       var b = el('button', { class: 'choice', type: 'button' }, 'ما معنى «' + RE.t(e.title).replace(/\s*\([^)]*\)/, '') + '»؟'); b.addEventListener('click', function () { send('ما معنى ' + e.title); }); chips.appendChild(b);
