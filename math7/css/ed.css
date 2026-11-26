@@ -347,3 +347,45 @@ html.tv .pad-key { height: 40px; }
 .mdots button { cursor: pointer; font: inherit; font-size: 13px; font-weight: 700; width: 32px; height: 32px; border: 2px solid var(--ink); border-radius: 50%; background: var(--white); }
 .mdots button.ok { background: var(--soft-green); } .mdots button.on { background: var(--ink); color: var(--paper); }
 .card.aicha .cmdline + .cmdline { margin-top: 8px; }
+
+/* ---------- the line that mirrors an answer, and its window ---------- */
+.codeline.mini { text-decoration: none; margin-top: 8px; padding: 3px 12px; font-size: 15px; width: fit-content; max-width: 100%; }
+.codeline.edit { gap: 2px; align-items: center; } .codeline.edit .num { font: inherit; min-width: 64px; text-align: center; color: var(--ink); background: var(--sun); border: 2px solid var(--paper); border-radius: 10px; padding: 0 8px; }
+.hear { cursor: pointer; font-size: 15px; margin-top: 6px; margin-inline-start: 6px; border: 2px solid var(--ink); border-radius: 999px; background: var(--white); padding: 0 10px; }
+#voiceBtn { padding: 0; } #voiceBtn .face { width: 26px; height: 26px; vertical-align: middle; } #voiceBtn.off { opacity: .4; filter: grayscale(1); }
+
+/* ---------- television: every page is one screen ---------- */
+html.tv body { font-size: 18px; }
+html.tv body:not(.in-stage) { height: 100vh; overflow: hidden; }
+html.tv .hello { padding: 8px 0 2px; } html.tv .hello h1 { font-size: 28px; margin: 0; } html.tv .hello p { display: none; }
+html.tv footer, html.tv .wrap > .muted { display: none; }
+html.tv .card { margin: 8px 0; padding: 12px 18px; }
+.tv-screen[hidden] { display: none; }
+.tvbar { position: fixed; bottom: 8px; left: 0; right: 0; z-index: 30; display: flex; justify-content: center; align-items: center; gap: 18px; }
+.tvbar .btn { padding: 2px 22px; } .tvbar .btn[disabled] { opacity: .3; }
+/* the road */
+.tvhome { display: flex; flex-direction: column; gap: 6px; height: calc(100vh - 62px); padding-top: 8px; padding-bottom: 10px; }
+.tvhead { display: flex; align-items: center; gap: 14px; } .tvhead h1 { font-size: 28px; margin: 0; margin-inline-end: auto; } .tvhead .pill { text-decoration: none; color: inherit; }
+.tvrow-title { font-weight: 700; font-size: 16px; margin-top: 4px; } .tvrow-title .num { display: inline-block; min-width: 26px; text-align: center; border: 2px solid var(--ink); border-radius: 8px; background: var(--sun); }
+.tiles-row { display: flex; gap: 10px; padding: 4px 2px 8px; }
+.station.tile { flex: 1 1 0; max-width: 96px; min-width: 0; padding: 6px 4px; text-align: center; box-shadow: 0 3px 0 var(--ink); border-radius: 14px; }
+.station.tile .ico { width: 44px; height: 44px; display: block; margin: 0 auto; }
+.station.tile .tn { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 11px; font-weight: 700; line-height: 1.35; height: 30px; }
+.tvdetail { flex: 1; min-height: 0; display: flex; align-items: center; gap: 20px; margin: 0 !important; overflow: hidden; }
+.tvdetail h2 { margin: 0 0 4px; font-size: 24px; } .tvdetail p { margin: 0 0 4px; }
+/* the lab: what is asked on one side, what she answers on the other */
+html.tv .aicha-head .face.big { width: 46px; height: 46px; } html.tv .labtabs { margin-bottom: 4px; }
+.tvlab { display: flex; flex-direction: column; height: calc(100vh - 52px); padding-bottom: 10px; }
+html.tv .card.aicha { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px; flex: 1; min-height: 0; align-content: start; margin: 4px 0 0; }
+html.tv .card.aicha > * { grid-column: 1; min-width: 0; }
+html.tv .card.aicha > .thread { grid-column: 2; grid-row: 1 / span 6; max-height: none; height: 100%; overflow: hidden; }
+html.tv .card.aicha .msg { max-width: 100%; } html.tv .card.aicha .msg-fig svg { max-height: 190px; }
+html.tv .card.aicha .cmds { margin: 0; } html.tv .card.aicha h3 { margin: 0; }
+html.tv table td, html.tv table th { padding: 2px 8px; font-size: 15px; line-height: 1.5; } html.tv table td br, html.tv table td .muted { display: none; }
+html.tv table .meter { display: inline-block; width: 90px; vertical-align: middle; margin-inline-end: 8px; }
+.station.tile .tn { font-family: inherit; }
+.tvlab { height: calc(100vh - 60px); }
+html.tv .card.aicha .cmdline { flex-wrap: wrap; margin-top: 4px; } html.tv .card.aicha .lab-who { flex-basis: 100%; font-size: 15px; }
+html.tv .card.aicha .cmdline .slot { flex: 1; min-height: 44px; }
+.station.tile .tn { font-family: "Readex Pro", "Noto Kufi Arabic", sans-serif !important; font-size: 12px; }
+.tvdetail .ico { width: 60px; height: 60px; flex: none; } .tvdetail h2 { font-size: 21px; line-height: 1.4; } .tvdetail p { font-size: 17px; line-height: 1.5; } .tvdetail .muted { font-size: 14px; }

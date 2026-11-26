@@ -246,6 +246,8 @@
       say('ok', '<span class="stars" aria-label="' + stars + ' نجوم">' + '★★★'.slice(0, stars) + '<i>' + '★★★'.slice(stars) + '</i></span> ' + msg + (q.explain ? '<br>' + q.explain : ''));
       box.classList.add('done');
       if (!opts.practiceOnly) { RE.settle(q.id, clean); if (RE.fx) RE.fx(r.shown ? 'show' : 'ok', { clean: clean, stars: stars, el: fb }); }
+      if (!opts.practiceOnly && RE.coach) RE.coach('ok', { clean: clean, shown: r.shown, msg: msg, explain: q.explain, answer: q.choices && !multi ? q.choices[q.answer] : inputs.map(function (i) { return i.value; }).join(' ; ') });
+      if (RE.afterAnswer) RE.afterAnswer(q, fb);
       if (opts.onDone) opts.onDone(clean);
     }
     function check() {
@@ -274,7 +276,8 @@
         var hit = typeof w.when === 'function' ? w.when(vals.map(RE.norm), selected) : (vals.map(RE.norm).indexOf(RE.norm(w.when)) >= 0 || (q.choices && selected.indexOf(w.when) >= 0));
         if (hit) special = w.say;
       });
-      say('think', special || N.pick(TRY));
+      var tryMsg = special || N.pick(TRY); say('think', tryMsg);
+      if (RE.coach) RE.coach('wrong', { special: special, text: tryMsg, tries: r.tries });
       if (RE.fx && !opts.practiceOnly) RE.fx('no', { el: fb });
       if (r.tries >= 2) showBtn.hidden = false;
       if (opts.onWrong) opts.onWrong(box.querySelector('.ans.no, .choice.no, .chip.no'));
@@ -283,7 +286,7 @@
     inputs.forEach(function (i) { i.addEventListener('keydown', function (e) { if (e.key === 'Enter' && i.tagName === 'INPUT') check(); }); i.addEventListener('input', function () { i.classList.remove('ok', 'no'); }); });
     hintBtn.addEventListener('click', function () {
       if (RE.fx) RE.fx('hint');
-      if (hintAt < q.hints.length) { r.hints++; RE.save(); say('hint', '<b>تلميح ' + (hintAt + 1) + ':</b> ' + q.hints[hintAt]); hintAt++; }
+      if (hintAt < q.hints.length) { r.hints++; RE.save(); say('hint', '<b>تلميح ' + (hintAt + 1) + ':</b> ' + q.hints[hintAt]); if (RE.coach) RE.coach('hint', { text: q.hints[hintAt] }); hintAt++; }
       if (hintAt >= q.hints.length) { hintBtn.hidden = true; showBtn.hidden = false; }
     });
     showBtn.addEventListener('click', function () {

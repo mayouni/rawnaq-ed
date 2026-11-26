@@ -20,7 +20,28 @@
   function setNav(k) { [].forEach.call(navEl.querySelectorAll('a'), function (a) { a.classList.toggle('on', a.getAttribute('data-k') === k); }); }
 
   /* ---------------- home ---------------- */
+  /* the road on a television: every station is a tile, the chosen one tells its story below. Nothing scrolls. */
+  function tvHome() {
+    setNav('home'); var w = page(''); w.classList.add('tv-own', 'tvhome');
+    var due = RE.due(), all = sorted(), next = all.filter(function (s) { return !complete(s); })[0], lv = RE.level();
+    var head = el('div', { class: 'tvhead' }, '<h1>' + t('أهلاً يا {name}').replace(/ يا\s*$/, '') + '</h1><a class="pill" href="#/notebook">المستوى <b class="m">' + lv.n + '</b> · <span class="m">★ ' + lv.stars + (lv.to ? ' / ' + lv.to : '') + '</span> · 🏅 <span class="m">' + Object.keys(RE.state.badges).length + '</span></a>');
+    if (due.length) head.appendChild(el('a', { class: 'btn sun', href: '#/review' }, 'مراجعة اليوم · <span class="m">' + due.length + '</span>'));
+    w.appendChild(head);
+    var detail = el('div', { class: 'card tvdetail' });
+    function show(s) { var st = RE.stationStats(s); detail.innerHTML = icon(s, 76) + '<div><h2>' + t(s.title) + '</h2><p>' + t(s.question) + '</p><span class="muted">كتابك، ص ' + pg(s.pages) + ' · حُلّ <span class="m">' + st.done + ' / ' + st.total + '</span></span></div>'; }
+    RE.units.forEach(function (u) {
+      w.appendChild(el('div', { class: 'tvrow-title' }, '<span class="num">' + u.num + '</span> ' + u.title));
+      var row = el('div', { class: 'tiles-row' });
+      all.filter(function (s) { return (s.unit || 'n') === u.id; }).forEach(function (s) {
+        var a = el('a', { class: 'station tile' + (complete(s) ? ' done' : s === next ? ' next' : ''), href: '#/s/' + s.id, 'aria-label': RE.g(s.title).replace(/`/g, '') }, icon(s, 44) + '<span class="tn">' + t(s.title).replace(/:.*$/, '') + '</span>');
+        a.addEventListener('focus', function () { show(s); }); row.appendChild(a);
+      });
+      w.appendChild(row);
+    });
+    w.appendChild(detail); show(next || all[0]);
+  }
   function home() {
+    if (RE.isTv) return tvHome();
     setNav('home'); var w = page('');
     var due = RE.due(), all = sorted(), next = all.filter(function (s) { return !complete(s); })[0];
     var started = Object.keys(RE.state.q).length > 0;
@@ -147,7 +168,7 @@
     top.appendChild(el('a', { class: 'back', href: c.exit || '#/', 'aria-label': 'الرجوع إلى الطريق' }, '→ الطريق'));
     top.appendChild(el('div', { class: 'stage-title' }, (c.icon || '') + '<b>' + c.title + '</b>'));
     if (c.pills) { var pills = el('div', { class: 'steps' }); c.pills.forEach(function (p) { pills.appendChild(el('a', { href: c.href(p.at), class: (!isEnd && sl.beat === p.beat ? 'on ' : '') + (p.seen ? 'seen' : ''), tabindex: RE.isTv ? -1 : 0 }, p.label)); }); top.appendChild(pills); }
-    if (c.aicha) top.appendChild(el('a', { class: 'back aicha-btn', href: c.aicha, 'aria-label': 'اسألي عايشة' }, RE.aichaFace + ' عايشة'));
+    if (c.aicha) top.appendChild(el('a', { class: 'back aicha-btn', href: c.aicha, 'aria-label': 'اسألي عَايْشَه' }, RE.aichaFace + ' عَايْشَه'));
     top.appendChild(el('div', { class: 'stage-stars', title: 'نجومي' }, '★ <span data-stars>' + RE.totalStars() + '</span>'));
     st.appendChild(top);
 
@@ -207,6 +228,7 @@
     bot.appendChild(track); bot.appendChild(next); st.appendChild(bot);
     root.appendChild(st);
     if (c.onShow && !isEnd) c.onShow(sl, n);
+    if (RE.coach && c.station) RE.coach(isEnd ? 'end' : 'screen', { station: c.station, n: n });
   }
 
   /* ---------------- a station ---------------- */

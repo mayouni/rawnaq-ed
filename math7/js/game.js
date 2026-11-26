@@ -38,8 +38,7 @@
     { id: 'rev', icon: '🔁', title: 'ذاكرة قويّة', how: 'مراجعة يوم كاملة', test: function () { return !!RE.state.reviewed; } },
     { id: 'make', icon: '🛠️', title: 'صانع[ة]', how: 'شيء من صنعك في الدفتر', test: function () { return RE.state.made.length > 0; } },
     { id: 'lab', icon: '🔬', title: 'في المختبر', how: 'أوّل سؤال تطرح[ينه|ه] على الحاسوب', test: function () { return !!RE.state.labbed; } },
-    { id: 'coder', icon: '⌨️', title: 'مترجم[ة] إلى Softanza', how: 'خمسة تحدّيات ترجمة في المختبر', test: function () { return RE.labDone && RE.labDone() >= 5; } },
-    { id: 'teach', icon: '🎓', title: 'معلّم[ة] عايشة', how: 'شيء علّمت[ِه|َه] لعايشة فحفظته', test: function () { return (RE.state.kb || []).length > 0; } }
+    { id: 'teach', icon: '🎓', title: 'معلّم[ة] عَايْشَه', how: 'شيء علّمت[ِه|َه] لعَايْشَه فحفظته', test: function () { return (RE.state.kb || []).length > 0; } }
   ];
   var toastHost = null;
   RE.toast = function (html, cls) {

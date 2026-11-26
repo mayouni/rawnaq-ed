@@ -21,7 +21,7 @@
   function go(e) {
     e.focus({ preventScroll: true });
     if (padOpen()) return;
-    e.scrollIntoView({ block: e.type === 'range' ? 'end' : 'center', inline: 'nearest' });
+    e.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }
   function first() {
     var it = items(), h = window.innerHeight, best = null, bs = 1e9;
@@ -53,8 +53,14 @@
     if (best) { go(best); if (RE.sound) RE.sound.play('move'); }
   }
 
+  /* a text field under the focus stays closed: the system keyboard comes only when the centre key asks for it */
+  function isText(e) { return e && (e.tagName === 'TEXTAREA' || (e.tagName === 'INPUT' && !/^(range|checkbox|radio|file|button)$/.test(e.type))); }
+  document.addEventListener('focusin', function (e) { if (isText(e.target) && !e.target._open) e.target.readOnly = true; });
+  document.addEventListener('focusout', function (e) { if (isText(e.target)) { e.target._open = false; e.target.readOnly = true; } });
   window.addEventListener('keydown', function (e) {
     var d = KEYS[e.key], cur = document.activeElement;
+    if (e.key === 'Enter' && isText(cur) && cur.readOnly) { e.preventDefault(); cur._open = true; cur.readOnly = false; cur.blur(); cur._open = true; cur.focus({ preventScroll: true }); return; }
+    if (isText(cur) && cur.readOnly && d) { e.preventDefault(); move(d[0], d[1]); return; }
     if (padOpen()) { if (d) { e.preventDefault(); move(d[0], d[1]); } return; }
     if (!d) return;
     var tag = cur && cur.tagName, range = tag === 'INPUT' && cur.type === 'range', typing = tag === 'TEXTAREA' || (tag === 'INPUT' && !range && cur.type !== 'checkbox');
@@ -71,9 +77,11 @@
   /* each new screen starts with something chosen, so the first arrow press is never lost */
   RE.afterRender = function () {
     RE.pad.drop();
+    if (RE.tvFit) RE.tvFit();
+    if (RE.syncVoice) RE.syncVoice();
     setTimeout(function () {
       var w = document.querySelector('.stage .pane.text .ans:not([disabled]), .stage .pane.text .choice, .stage .pane.text .chip, .stage .pane.text .term, .stage .pane.fig input[type=range], .stage .btn.next, #app .station.next, #app a.station, #app .btn');
-      if (w) w.focus({ preventScroll: true });
+      if (w && w.getClientRects().length) w.focus({ preventScroll: true }); else first();
     }, 30);
   };
 })();
