@@ -454,3 +454,4 @@ html.tv .msg .body { padding: 8px 14px 10px; }
 html.tv .card.aicha.voicecard { display: block; }
 /* the sieve of a hundred numbers fits its half of a television */
 html.tv .grid100 { max-width: 292px; gap: 3px; } html.tv .grid100 button { font-size: 13px; border-radius: 6px; border-width: 1.5px; }
+.station.tile .tn { height: auto; min-height: 36px; line-height: 1.5; padding-bottom: 2px; } html.tv .station.tile { padding-bottom: 8px; } html.tv .station.tile .ico { width: 40px; height: 40px; }
