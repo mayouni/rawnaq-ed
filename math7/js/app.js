@@ -228,6 +228,7 @@
     }
     bot.appendChild(track); bot.appendChild(next); st.appendChild(bot);
     root.appendChild(st);
+    if (RE.cues && !isEnd) RE.cues(text, fig);
     if (c.onShow && !isEnd) c.onShow(sl, n);
     if (RE.coach && c.station) RE.coach(isEnd ? 'end' : 'screen', { station: c.station, n: n });
   }

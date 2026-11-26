@@ -412,3 +412,28 @@ html.tv .stage .pane.text > .muted { display: none; }
 html.tv .stage.solo .pane.text { max-width: 780px; }
 html.tv .uses { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; } html.tv .use { padding: 8px 10px; } html.tv .use-ico { font-size: 38px; } html.tv .use p { font-size: 15px; line-height: 1.6; }
 html.tv .idea { padding: 10px 16px; }
+
+/* ---------- cues: words and numbers that point at the drawing ---------- */
+.cue { font: inherit; color: inherit; background: none; border: 0; border-bottom: 3px dotted var(--blue); border-radius: 4px; padding: 0 2px; margin: 0; cursor: pointer; line-height: inherit; }
+.cue:hover, .cue:focus, .cue.now { background: var(--sky); outline: none; border-bottom-style: solid; }
+.cuebar { display: flex; gap: 8px; margin: 2px 0 8px; }
+.cuebtn { font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; padding: 0 14px; border: 2px solid var(--ink); border-radius: 999px; background: var(--paper2); }
+.ans.asked { outline: 5px solid var(--orange); outline-offset: 3px; animation: cuepulse .7s ease-in-out 3; }
+.pane.fig.cue-on svg.viz > *:not(.cue-hit) { opacity: .38; transition: opacity .2s; }
+.pane.fig .cue-hit { opacity: 1; transform-box: fill-box; transform-origin: center; animation: cuepulse .7s ease-in-out 3; }
+.pane.fig polygon.cue-hit, .pane.fig rect.cue-hit, .pane.fig circle.cue-hit { stroke: var(--blue); stroke-width: 7; }
+.pane.fig line.cue-hit, .pane.fig line.edge.cue-hit, .pane.fig path.cue-hit { stroke: var(--blue); stroke-width: 8; stroke-dasharray: none; }
+.pane.fig text.cue-hit { fill: var(--blue); font-size: 26px; paint-order: stroke; stroke: var(--white); stroke-width: 5px; }
+.pane.fig [data-role~="ask"].cue-hit { stroke: var(--orange); }
+@keyframes cuepulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+@media (prefers-reduced-motion: reduce) { .pane.fig .cue-hit, .ans.asked { animation: none; } }
+
+/* ---------- television: a margin the glass may hide, and a focus mark that covers nothing ---------- */
+html.tv .stage { padding: 12px 24px; box-sizing: border-box; }
+html.tv .top .wrap { padding-inline: 30px; padding-top: 14px; } html.tv .wrap { padding-inline: 30px; }
+html.tv .tvbar { bottom: 18px; } html.tv .tvhome { height: calc(100vh - 86px); } .tvlab { height: calc(100vh - 86px); }
+html.tv .pad { bottom: 12px; right: 24px; width: calc(50% - 24px); border-radius: 14px 0 0 14px; }
+html.tv :focus { outline: 4px solid var(--blue); outline-offset: 1px; box-shadow: 0 0 0 2px var(--sun) !important; }
+html.tv .cue:focus { outline: 3px solid var(--blue); outline-offset: 0; box-shadow: none !important; border-radius: 6px; }
+html.tv .tvlab .cmds .choice { font-size: 15px; padding: 0 12px; } html.tv .tvlab .cmds { gap: 6px; }
+html.tv body.pad-on .cuebar, html.tv body.pad-on .qbox .qn { display: none; }

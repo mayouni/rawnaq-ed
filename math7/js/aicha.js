@@ -275,7 +275,7 @@
     }
     function send(s) {
       s = String(s || '').trim(); if (!s) return;
-      hush(); if (RE.isTv) thread.innerHTML = ''; bubble(thread, 'me', s.replace(/</g, '&lt;'));
+      hush(); if (RE.isTv) thread.innerHTML = ''; else bubble(thread, 'me', s.replace(/</g, '&lt;'));
       var a = ask(s, st) || { say: '...' };
       if (!RE.state.labbed) { RE.state.labbed = RE.today(); RE.save(); RE.checkBadges(); }
       RE.fx('page'); answerInto(thread, a, { teach: RE.isTv ? null : teach });

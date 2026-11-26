@@ -76,12 +76,30 @@
     }
   };
 
+  /* the lab: the keys on one side, her answer on the other; each side is drawn smaller rather than cut */
+  var labObs = null;
+  RE.tvLab = function () {
+    var card = document.querySelector('.tvlab .card.aicha'); if (!card) return;
+    var th = card.querySelector('.thread'), keys = card.querySelector('.cmds, .tiles'), i;
+    function fit() {
+      if (th) { for (i = 0; i < STEPS.length; i++) { th.style.zoom = STEPS[i]; if (th.scrollHeight <= th.clientHeight + 2) break; } }
+      if (keys) { for (i = 0; i < STEPS.length; i++) { keys.style.zoom = STEPS[i]; if (card.scrollHeight <= card.clientHeight + 2) break; } }
+    }
+    fit();
+    if (labObs) labObs.disconnect();
+    if (th) { labObs = new MutationObserver(function () { requestAnimationFrame(fit); }); labObs.observe(th, { childList: true }); }
+  };
+
+  /* a lesson screen has nowhere to scroll to: if anything moves it, it is put back */
+  document.addEventListener('scroll', function (e) { var x = e.target; if (x && x.classList && (x.classList.contains('stage') || x.classList.contains('panes') || x.classList.contains('pane'))) { if (x.scrollLeft) x.scrollLeft = 0; if (x.scrollTop && !x.classList.contains('pane')) x.scrollTop = 0; } }, true);
+
   RE.tvFit = function () {
     var old = document.querySelector('.tvbar'); if (old) old.remove();
     if (document.body.classList.contains('in-stage')) { RE.tvStage(); return; }
     var w = document.querySelector('#app > .wrap, main > .wrap, .wrap.page') || [].filter.call(document.querySelectorAll('.wrap'), function (x) { return !x.closest('.top'); })[0];
+    if (w && w.classList.contains('tvlab')) { RE.tvLab(); return; }
     if (!w || w.classList.contains('tv-own') || w.querySelector('.tv-screen')) return;
-    var key = location.hash, room = window.innerHeight - w.getBoundingClientRect().top - 58;
+    var key = location.hash, room = window.innerHeight - w.getBoundingClientRect().top - 74;
     var blocks = [].filter.call(w.children, function (b) { return b.offsetHeight > 0; }), parts = [];
     blocks.forEach(function (b) { if (outer(b) > room) { var p = split(b, room); if (p[0] !== b) { p.forEach(function (x) { w.insertBefore(x, b); }); b.remove(); } parts = parts.concat(p); } else parts.push(b); });
     var screens = [], cur = null, used = 0;

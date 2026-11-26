@@ -155,38 +155,44 @@
   /* ---------- shape: a labelled geometric figure ---------- */
   G.shape = function (o) {
     var s = cv(480, 300), f = soft(o.fill || 'ssun'), st = { stroke: C.ink, 'stroke-width': 3.5, 'stroke-linejoin': 'round', fill: f }, t = o.type || 'rect';
-    var P = function (pts) { return add(s, 'polygon', Object.assign({ points: pts.map(function (p) { return p.join(','); }).join(' ') }, st)); };
-    var dash = function (x1, y1, x2, y2) { add(s, 'line', { x1: x1, y1: y1, x2: x2, y2: y2, stroke: C.red, 'stroke-width': 3, 'stroke-dasharray': '7 6' }); };
+    /* data-role names each part, so that a word of the exercise can light it (cues.js) */
+    var P = function (pts) { return add(s, 'polygon', Object.assign({ points: pts.map(function (p) { return p.join(','); }).join(' '), 'data-role': 'shape area perimeter' }, st)); };
+    var dash = function (x1, y1, x2, y2, role) { add(s, 'line', { x1: x1, y1: y1, x2: x2, y2: y2, stroke: C.red, 'stroke-width': 3, 'stroke-dasharray': '7 6', 'data-role': role || 'height' }); };
+    /* an edge drawn again on top of the outline, unseen until it is pointed at */
+    var E = function (a, b, role) { add(s, 'line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: 'transparent', 'stroke-width': 7, 'stroke-linecap': 'round', class: 'edge', 'data-role': role }); };
     var sq = function (x, y, dx, dy) { add(s, 'path', { d: 'M' + (x + dx) + ' ' + y + ' v' + dy + ' h' + -dx, fill: 'none', stroke: C.ink, 'stroke-width': 2 }); };
-    var L = function (x, y, str, c) { if (str != null && str !== '') T(s, x, y, str, { size: 18, fill: c }); };
+    var L = function (x, y, str, c, role) { if (str != null && str !== '') { var tx = T(s, x, y, str, { size: 18, fill: c }); if (role) tx.setAttribute('data-role', role); } };
     var nm = o.names || [];
     if (t === 'rect' || t === 'square') {
       var w = t === 'square' ? 170 : 280, h = t === 'square' ? 170 : 150, x = (480 - w) / 2, y = 56;
-      add(s, 'rect', Object.assign({ x: x, y: y, width: w, height: h }, st));
-      L(240, y + h + 28, t === 'square' ? o.a : o.w); L(x - 12 - String(o.h || o.a || '').length * 4.5, y + h / 2 + 6, t === 'square' ? '' : o.h);
-      if (t === 'square') L(x + w + 14 + String(o.a || '').length * 4.5, y + h / 2 + 6, o.a);
+      add(s, 'rect', Object.assign({ x: x, y: y, width: w, height: h, 'data-role': 'shape area perimeter' }, st));
+      E([x, y + h], [x + w, y + h], t === 'square' ? 'side' : 'w base'); E([x, y], [x, y + h], t === 'square' ? 'side' : 'h');
+      L(240, y + h + 28, t === 'square' ? o.a : o.w, null, t === 'square' ? 'side' : 'w base'); L(x - 12 - String(o.h || o.a || '').length * 4.5, y + h / 2 + 6, t === 'square' ? '' : o.h, null, 'h');
+      if (t === 'square') { E([x + w, y], [x + w, y + h], 'side'); E([x, y], [x + w, y], 'side'); L(x + w + 14 + String(o.a || '').length * 4.5, y + h / 2 + 6, o.a, null, 'side'); }
       L(x - 12, y - 6, nm[0]); L(x + w + 12, y - 6, nm[1]); L(x + w + 12, y + h + 22, nm[2]); L(x - 12, y + h + 22, nm[3]);
     } else if (t === 'tri') {
       var ax = o.apex == null ? 0.62 : o.apex, A = [90 + 300 * ax, 50], B = [90, 220], Cc = [390, 220];
       P([A, B, Cc]); dash(A[0], A[1], A[0], 220); sq(A[0], 220 - 12, 12, 12);
-      L(240, 252, o.b); L(A[0] + 14 + String(o.h || '').length * 4.5, 145, o.h, C.red);
+      E(B, Cc, 'base'); L(240, 252, o.b, null, 'base'); L(A[0] + 14 + String(o.h || '').length * 4.5, 145, o.h, C.red, 'height');
       L(A[0], 40, nm[0]); L(78, 240, nm[1]); L(402, 240, nm[2]);
     } else if (t === 'rtri') {
       P([[120, 50], [120, 220], [380, 220]]); sq(120, 208, 12, 12);
-      L(120 - 14 - String(o.a || '').length * 4.5, 140, o.a); L(250, 250, o.b); L(268, 122, o.c);
+      E([120, 50], [120, 220], 'side height'); E([120, 220], [380, 220], 'side base'); E([120, 50], [380, 220], 'side');
+      L(120 - 14 - String(o.a || '').length * 4.5, 140, o.a, null, 'height'); L(250, 250, o.b, null, 'base'); L(268, 122, o.c);
       L(120, 40, nm[0]); L(106, 240, nm[1]); L(394, 240, nm[2]);
     } else if (t === 'trap') {
       P([[170, 60], [330, 60], [410, 210], [80, 210]]); dash(170, 60, 170, 210); sq(170, 198, 12, 12);
-      L(250, 48, o.b); L(245, 240, o.B); L(170 + 14 + String(o.h || '').length * 4.5, 142, o.h, C.red);
+      E([170, 60], [330, 60], 'top'); E([80, 210], [410, 210], 'base');
+      L(250, 48, o.b, null, 'top'); L(245, 240, o.B, null, 'base'); L(170 + 14 + String(o.h || '').length * 4.5, 142, o.h, C.red, 'height');
     } else if (t === 'para') {
       P([[150, 70], [420, 70], [340, 210], [70, 210]]); dash(150, 70, 150, 210); sq(150, 198, 12, 12);
-      L(205, 240, o.b); L(150 + 14 + String(o.h || '').length * 4.5, 146, o.h, C.red);
+      E([70, 210], [340, 210], 'base'); L(205, 240, o.b, null, 'base'); L(150 + 14 + String(o.h || '').length * 4.5, 146, o.h, C.red, 'height');
     } else if (t === 'rhombus') {
-      P([[240, 40], [400, 140], [240, 240], [80, 140]]); dash(80, 140, 400, 140); dash(240, 40, 240, 240);
-      L(320, 132, o.d1, C.red); L(240 + 14 + String(o.d2 || '').length * 4.5, 100, o.d2, C.red);
+      P([[240, 40], [400, 140], [240, 240], [80, 140]]); dash(80, 140, 400, 140, 'diag d1'); dash(240, 40, 240, 240, 'diag d2');
+      L(320, 132, o.d1, C.red, 'd1'); L(240 + 14 + String(o.d2 || '').length * 4.5, 100, o.d2, C.red, 'd2');
     } else if (t === 'circle') {
-      add(s, 'circle', Object.assign({ cx: 240, cy: 145, r: 100 }, st)); add(s, 'line', { x1: 240, y1: 145, x2: 340, y2: 145, stroke: C.red, 'stroke-width': 3 });
-      add(s, 'circle', { cx: 240, cy: 145, r: 5, fill: C.ink }); L(290, 136, o.r, C.red); L(228, 166, nm[0] || 'O');
+      add(s, 'circle', Object.assign({ cx: 240, cy: 145, r: 100, 'data-role': 'shape area perimeter' }, st)); add(s, 'line', { x1: 240, y1: 145, x2: 340, y2: 145, stroke: C.red, 'stroke-width': 3, 'data-role': 'radius' });
+      add(s, 'circle', { cx: 240, cy: 145, r: 5, fill: C.ink }); L(290, 136, o.r, C.red, 'radius'); L(228, 166, nm[0] || 'O');
     } else if (t === 'cube') {
       var n = Math.min(10, Math.max(1, Number(o.n) || 3)), a = 150, dx = 62, dy = 44, x2 = 130, y2 = 96, i;
       P([[x2, y2], [x2 + a, y2], [x2 + a, y2 + a], [x2, y2 + a]]);
@@ -200,7 +206,7 @@
       }
       L(x2 + a / 2, y2 + a + 28, o.a == null ? n : o.a);
     }
-    if (o.ask) { var aw = String(o.ask).length * 9 + 26; box(s, 240 - aw / 2, t === 'tri' || t === 'rtri' ? 170 : 126, aw, 34, C.sun, { rx: 12, sw: 2.5 }); T(s, 240, (t === 'tri' || t === 'rtri' ? 170 : 126) + 23, o.ask, { size: 16 }); }
+    if (o.ask) { var aw = String(o.ask).length * 9 + 26, acx = t === 'trap' || t === 'para' ? 292 : 240; box(s, acx - aw / 2, t === 'tri' || t === 'rtri' ? 170 : 126, aw, 34, C.sun, { rx: 12, sw: 2.5 }).setAttribute('data-role', 'ask'); T(s, acx, (t === 'tri' || t === 'rtri' ? 170 : 126) + 23, o.ask, { size: 16 }).setAttribute('data-role', 'ask'); }
     caption(s, 480, 290, o.note);
     return s;
   };
