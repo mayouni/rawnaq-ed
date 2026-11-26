@@ -299,8 +299,7 @@ body.pad-on:not(.in-stage) { padding-bottom: 260px; }
 /* ---------- television ---------- */
 html.tv body { font-size: 20px; }
 html.tv .wrap { max-width: 1120px; }
-html.tv :focus { outline: 5px solid var(--blue); outline-offset: 2px; box-shadow: 0 0 0 9px var(--sun) !important; border-radius: 12px; }
-html.tv .pad-key:focus { outline: 4px solid var(--sun); box-shadow: none !important; background: var(--sun); transform: scale(1.08); }
+html.tv .pad-key:focus { background: var(--sun); }
 html.tv input[type=range] { height: 36px; }
 html.tv .grid100 { max-width: 620px; }
 html.tv .stage .qt { line-height: 2.2; }
@@ -423,7 +422,7 @@ html.tv .idea { padding: 10px 16px; }
 .pane.fig .cue-hit { opacity: 1; transform-box: fill-box; transform-origin: center; animation: cuepulse .7s ease-in-out 3; }
 .pane.fig polygon.cue-hit, .pane.fig rect.cue-hit, .pane.fig circle.cue-hit { stroke: var(--blue); stroke-width: 7; }
 .pane.fig line.cue-hit, .pane.fig line.edge.cue-hit, .pane.fig path.cue-hit { stroke: var(--blue); stroke-width: 8; stroke-dasharray: none; }
-.pane.fig text.cue-hit { fill: var(--blue); font-size: 26px; paint-order: stroke; stroke: var(--white); stroke-width: 5px; }
+.pane.fig text.cue-hit { fill: var(--blue); }
 .pane.fig [data-role~="ask"].cue-hit { stroke: var(--orange); }
 @keyframes cuepulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
 @media (prefers-reduced-motion: reduce) { .pane.fig .cue-hit, .ans.asked { animation: none; } }
@@ -433,8 +432,7 @@ html.tv .stage { padding: 12px 24px; box-sizing: border-box; }
 html.tv .top .wrap { padding-inline: 30px; padding-top: 14px; } html.tv .wrap { padding-inline: 30px; }
 html.tv .tvbar { bottom: 18px; } html.tv .tvhome { height: calc(100vh - 86px); } .tvlab { height: calc(100vh - 86px); }
 html.tv .pad { bottom: 12px; right: 24px; width: calc(50% - 24px); border-radius: 14px 0 0 14px; }
-html.tv :focus { outline: 4px solid var(--blue); outline-offset: 1px; box-shadow: 0 0 0 2px var(--sun) !important; }
-html.tv .cue:focus { outline: 3px solid var(--blue); outline-offset: 0; box-shadow: none !important; border-radius: 6px; }
+
 html.tv .tvlab .cmds .choice { font-size: 15px; padding: 0 12px; } html.tv .tvlab .cmds { gap: 6px; }
 html.tv body.pad-on .cuebar, html.tv body.pad-on .qbox .qn { display: none; }
 
@@ -455,3 +453,61 @@ html.tv .card.aicha.voicecard { display: block; }
 /* the sieve of a hundred numbers fits its half of a television */
 html.tv .grid100 { max-width: 292px; gap: 3px; } html.tv .grid100 button { font-size: 13px; border-radius: 6px; border-width: 1.5px; }
 .station.tile .tn { height: auto; min-height: 36px; line-height: 1.5; padding-bottom: 2px; } html.tv .station.tile { padding-bottom: 8px; } html.tv .station.tile .ico { width: 40px; height: 40px; }
+
+/* ================= 0.9 =================
+   Minwal, the chapter of motion. On a television nothing moves unless the movement says something about the lesson
+   (Zayn: «Motion Reports, It Never Decorates», «No Surprises»). Three movements are kept, each with one meaning:
+     cuepulse : «look here» — the part of the drawing a word points at, or the box that is asked for;
+     drop     : «this has just arrived» — a card that announces stars or a badge;
+     confetti : «a station is complete».
+   Everything else is still: a key under the focus does not sink, a chosen chip does not rise, a pad key does not grow. */
+html.tv .btn:hover, html.tv .btn:focus-visible, html.tv .btn:focus, html.tv .nav a:hover, html.tv .nav a:focus-visible, html.tv .station:hover, html.tv .station:focus-visible,
+html.tv .chip.sel, html.tv .pad-key:focus, html.tv .pad-key:active, html.tv .tile:active { transform: none; }
+html.tv .btn, html.tv .nav a, html.tv .station, html.tv .choice, html.tv .chip, html.tv .term { transition: none; }
+
+/* the focus mark is drawn inside the thing it marks: it can never cover what is beside it (Zayn: «Respect the Ma») */
+html.tv :focus { outline: 3px solid var(--blue); outline-offset: -3px; box-shadow: inset 0 0 0 6px var(--sun) !important; }
+html.tv .cue:focus { outline: 0; box-shadow: none !important; background: var(--sun); border-radius: 6px; }
+html.tv .pad-key:focus { outline: 3px solid var(--blue); outline-offset: -3px; box-shadow: none !important; }
+html.tv button.ans.slot.typing { outline-offset: -4px; } html.tv .ans.asked { outline-width: 4px; outline-offset: -4px; }
+html.tv .qt .ans, html.tv .expr .ans { margin: 2px 8px; }
+html.tv .terms { gap: 10px 12px; } html.tv .choices { gap: 12px; } html.tv .chips { gap: 10px; } html.tv .cuebar { gap: 12px; margin: 4px 0 10px; }
+
+/* the top bar of a lesson: the title gives way, the keys are never cut */
+html.tv .stage-top { gap: 10px; padding: 6px 4px; }
+.stage-top .stage-title { flex: 1 1 0; min-width: 60px; } .stage-top .stage-title b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.stage-top .steps { flex: 0 1 auto; justify-content: flex-start; margin: 0; }
+
+/* the card of a station on the road: centred while it fits, and measured from its top when it does not */
+.tvdetail { align-items: flex-start; } .tvdetail > * { margin-block: auto; }
+
+/* the lab on a television: one thin line above the work */
+html.tv .tvlab .labtabs { margin: 2px 0 2px; gap: 10px; align-items: center; } html.tv .labtabs .labname { font-size: 17px; margin-inline-end: 6px; }
+html.tv .tvlab { height: calc(100vh - 84px); padding-top: 4px; }
+/* the pad, outside a lesson: over the side of her answer, whole on the glass */
+html.tv body:not(.in-stage) .pad { left: 30px; right: auto; transform: none; width: calc(50% - 48px); max-width: none; bottom: 20px; border-radius: 14px; }
+
+/* the card that announces: in the middle of the screen, wide, and there long enough to be read */
+.toasts { top: 50%; transform: translateY(-50%); gap: 12px; }
+.toast { width: auto; min-width: min(460px, 86vw); max-width: min(680px, 92vw); padding: 14px 26px; font-size: 19px; box-sizing: border-box; }
+.toast > span:last-child { flex: 1; min-width: 0; } .toast .big { font-size: 52px; flex: none; }
+
+/* Rawnaq's own window for a question */
+.rq-modal { position: fixed; inset: 0; z-index: 95; background: rgba(43, 40, 64, .45); display: grid; place-items: center; padding: 24px; }
+.rq-box { background: var(--white); border: var(--line) solid var(--ink); border-radius: 22px; box-shadow: 0 8px 0 var(--ink); padding: 22px 28px; max-width: 560px; width: 100%; text-align: center; box-sizing: border-box; }
+.rq-box p { font-size: 20px; line-height: 1.8; margin: 0 0 18px; font-weight: 600; } .rq-row { display: flex; gap: 22px; justify-content: center; flex-wrap: wrap; }
+.rq-row .btn { min-width: 150px; }
+
+/* ---------- the playground of a figure ---------- */
+.pane.fig.has-play { flex-direction: column; gap: 8px; } .pane.fig.has-play > .vizbox, .pane.fig.has-play > .vizset { width: 100%; min-height: 0; }
+.playbar { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; flex: none; }
+.playbtn { font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; padding: 1px 16px; border: 2px solid var(--ink); border-radius: 999px; background: var(--sky); }
+.playbtn.back { background: var(--white); }
+.playctl { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 6px 16px; } .playctl[hidden], .playsee[hidden], .playbtn[hidden] { display: none; }
+.playvar { display: inline-grid; grid-template-columns: auto auto auto; justify-items: center; align-items: center; gap: 2px 5px; font-size: 14px; } .playvar b { grid-column: 1 / -1; grid-row: 1; line-height: 1.4; }
+.pm { font: inherit; font-size: 20px; font-weight: 700; line-height: 1; width: 38px; height: 34px; cursor: pointer; border: 2px solid var(--ink); border-radius: 10px; background: var(--white); padding: 0; }
+.pv { min-width: 3.4em; text-align: center; font-weight: 700; background: var(--sun); border: 2px solid var(--ink); border-radius: 10px; padding: 0 6px; line-height: 30px; }
+.playsee { width: 100%; box-sizing: border-box; min-height: 3.9em; background: var(--soft-sun); border: 2px solid var(--ink); border-radius: 14px; padding: 4px 14px; font-size: 16px; line-height: 1.8; text-align: center; }
+.playfig { width: 100%; } .vizset .playbar { margin-top: 8px; }
+html.tv .tvlab .cmds { gap: 10px; }
+.rq-row .btn.sun { box-shadow: 0 5px 0 var(--ink); }

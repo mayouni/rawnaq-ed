@@ -53,14 +53,25 @@
      the feedback after an answer, the pad open under it), the whole half is drawn a little smaller until it fits.
      It is checked again whenever something appears in it. */
   var STEPS = [1, 0.94, 0.88, 0.82, 0.76, 0.7, 0.64, 0.58], watching = null, obs = null, busy = false;
+  /* the meaning of a word is shown in a box that has, from the start, the room of the longest meaning:
+     moving from one word to the next changes the words in the box and nothing else on the screen */
+  function sizeDef(p) {
+    var def = p.querySelector('.term-def'); if (!def || !def._all) return;
+    var keep = def.innerHTML, mx = 0; def.style.minHeight = '';
+    def._all.forEach(function (h) { def.innerHTML = h; mx = Math.max(mx, def.offsetHeight); });
+    def.innerHTML = keep; def.style.minHeight = mx + 'px';
+  }
+  /* Zayn, «No Surprises»: a screen that was drawn smaller to hold something new is never drawn bigger again
+     while it is on the glass: things appear, they do not make the others jump back and forth. */
   function fitPane(p, pad) {
     if (!p) return;
-    var room = 0; if (pad && !pad.hidden && document.body.classList.contains('pad-on')) room = pad.offsetHeight + 6;
+    var room = 0, open = pad && !pad.hidden && document.body.classList.contains('pad-on'); if (open) room = pad.offsetHeight + 6;
     busy = true;
-    for (var i = 0; i < STEPS.length; i++) {
-      p.style.zoom = STEPS[i]; p.style.paddingBottom = room ? (room / STEPS[i]) + 'px' : '';
+    for (var i = p._zi || 0; i < STEPS.length; i++) {
+      p.style.zoom = STEPS[i]; p.style.paddingBottom = room ? (room / STEPS[i]) + 'px' : ''; sizeDef(p);
       if (p.scrollHeight <= p.clientHeight + 2) break;
     }
+    if (!open) p._zi = Math.min(i, STEPS.length - 1);
     p.scrollTop = 0;
     setTimeout(function () { busy = false; }, 0);
   }
@@ -68,7 +79,8 @@
     var p = document.querySelector('.stage .pane.text'); if (!p) return;
     var pad = RE.pad && RE.pad.el ? RE.pad.el() : null;
     fitPane(p, pad);
-    var f = document.querySelector('.stage .pane.fig'); if (f) { f.style.zoom = 1; for (var i = 0; i < STEPS.length && f.scrollHeight > f.clientHeight + 2; i++) f.style.zoom = STEPS[i]; }
+    var f = document.querySelector('.stage .pane.fig');
+    if (f) { for (var i = f._zi || 0; i < STEPS.length; i++) { f.style.zoom = STEPS[i]; if (f.scrollHeight <= f.clientHeight + 2) break; } f._zi = Math.min(i, STEPS.length - 1); }
     if (watching !== p) {
       if (obs) obs.disconnect();
       watching = p; obs = new MutationObserver(function () { if (!busy) requestAnimationFrame(function () { fitPane(p, RE.pad && RE.pad.el ? RE.pad.el() : null); }); });
@@ -96,8 +108,18 @@
   /* a box whose words must stay inside it and away from its frame: drawn smaller until they do */
   RE.tvBox = function (b) {
     if (!b || !b.clientHeight) return;
-    for (var i = 0; i < STEPS.length; i++) { b.style.zoom = STEPS[i]; if (b.scrollHeight <= b.clientHeight + 1 && b.scrollWidth <= b.clientWidth + 1) break; }
+    function inside() {
+      if (b.scrollHeight > b.clientHeight + 1 || b.scrollWidth > b.clientWidth + 1) return false;
+      var r = b.getBoundingClientRect(), ok = true;
+      [].forEach.call(b.querySelectorAll('h1, h2, h3, p, .ico'), function (k) { var q = k.getBoundingClientRect(); if (q.height && (q.top < r.top + 6 || q.bottom > r.bottom - 6)) ok = false; });
+      return ok;
+    }
+    for (var i = 0; i < STEPS.length; i++) { b.style.zoom = STEPS[i]; if (inside()) break; }
   };
+
+  /* the letters of Rawnaq arrive a moment after the first screen and are wider than the ones they replace:
+     the screen is measured again when they are there */
+  try { if (document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(function () { setTimeout(function () { window.dispatchEvent(new HashChangeEvent('hashchange')); }, 50); }); } catch (e) { /* older engines measure once */ }
 
   RE.tvFit = function () {
     var old = document.querySelector('.tvbar'); if (old) old.remove();

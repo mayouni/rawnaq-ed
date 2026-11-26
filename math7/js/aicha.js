@@ -147,9 +147,43 @@
   /* one line is one breath. The sentence is cut at every stop, and each part is said on its own, with a short
      silence before the next: this is what makes the reading sound like a person and not like a list. */
   function breaths(s) { return s.replace(/\s*([.،؛:؟!…])\s+/g, '$1\n').split('\n').map(function (x) { return x.trim(); }).filter(function (x) { return x && !/^[.،؛:؟!…]+$/.test(x); }); }
-  function speak(html, asked) {
+  /* ---- the sentence for the ear ----
+     What is on the screen is written for the eye: symbols, pictures, fractions, code. She never reads that.
+     Each thing she says has its own version, made here: short, in plain words, with a stop wherever a person
+     would breathe, and with nothing that is not a word or a number. A lesson may also bring its own sentence
+     (say: { hints: [...], explain: '...' } on an exercise), which is then used as it is.
+     The sentence is kept in a hidden element (#said): it is what she says, and nothing else is said. */
+  var UNITS = [['km', 'كيلومتر'], ['cm', 'صنتمتر'], ['mm', 'مليمتر'], ['dm', 'ديسيمتر'], ['dam', 'ديكامتر'], ['hm', 'هكتومتر'], ['kg', 'كيلوغرام'], ['min', 'دقيقة'], ['m', 'متر'], ['g', 'غرام'], ['L', 'لتر'], ['h', 'ساعة']];
+  function ear(html, max) {
+    var s = RE.g(String(html == null ? '' : html));
+    s = s.replace(/<span class="stars"[\s\S]*?<\/span>\s*<\/span>|<span class="stars"[\s\S]*?<\/span>/g, ' ').replace(/\[\[[^\]]*\]\]/g, ' كذا ')
+      .replace(/\{([^{}\/]+)\/([^{}\/]+)\}/g, ' $1 على $2 ')
+      .replace(/<br\s*\/?>|<\/(p|div|li|h\d)>/g, '. ').replace(/<sup>([^<]*)<\/sup>/g, ' أسّ $1 ').replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/g, ' ').replace(/&lt;/g, ' أصغر من ').replace(/&gt;/g, ' أكبر من ').replace(/&[a-z]+;/g, ' ')
+      .replace(/ق\.م\.أ/g, 'القاسم المشترك الأكبر').replace(/م\.م\.أ/g, 'المضاعف المشترك الأصغر')
+      .replace(/\bTRUE\b/g, 'نعم').replace(/\bFALSE\b/g, 'لا').replace(/(\d)\s*°/g, '$1 درجة');
+    UNITS.forEach(function (u) { s = s.replace(new RegExp('(\\d)\\s*' + u[0] + '\\s*([²2³3])?(?![A-Za-z])', 'g'), function (_, d, p) { return d + ' ' + u[1] + (p === '²' || p === '2' ? ' مربّع' : p ? ' مكعّب' : '') + ' '; }); });
+    s = s.replace(/\(([^()]+)\)\s*\^\s*(\d+)/g, ' بين قوسين $1 ، والكلّ أسّ $2 ').replace(/\(([^()]*[+−\-×:][^()]*)\)/g, ' بين قوسين $1 ، ');
+    s = s.replace(/\^\s*\(?\s*(\d+)\s*\)?/g, ' أسّ $1 ').replace(/×/g, ' في ').replace(/÷/g, ' على ').replace(/([\d)])\s*:\s*([\d(])/g, '$1 على $2')
+      .replace(/\+/g, ' زائد ').replace(/([\d)])\s*[−\-]\s*([\d(])/g, '$1 ناقص $2').replace(/≠/g, ' لا يساوي ').replace(/=/g, ' يساوي ')
+      .replace(/≤/g, ' أصغر من أو يساوي ').replace(/≥/g, ' أكبر من أو يساوي ').replace(/</g, ' أصغر من ').replace(/>/g, ' أكبر من ')
+      .replace(/(\d),(\d)/g, '$1 فاصل $2').replace(/(\d) (?=\d{3}(\D|$))/g, '$1').replace(/[;,]/g, '، ').replace(/…|\.\.\./g, '، ')
+      .replace(/\b[A-Za-z_]{4,}\b|\b[a-z_]+\b/g, ' ')                 /* code and Latin words are not read; the names of points (A, AB) stay */
+      .replace(/[^؀-ۿ0-9A-Z\s.،؛:؟!]/g, ' ')                /* pictures, arrows, stars, brackets: nothing of the kind is read */
+      .replace(/([A-Z])(?=[A-Z])/g, '$1 ')
+      .replace(/\s+/g, ' ').replace(/\s+([.،؛:؟!])/g, '$1').replace(/([.،؛:؟!])(?:\s*[.،؛:؟!])+/g, '$1').replace(/^[\s.،؛:؟!]+/, '').trim();
+    var parts = breaths(s).filter(function (x) { return /[ء-ي0-9]/.test(x); });
+    /* short: a few breaths, cut at the end of a sentence when there is one */
+    if (max && parts.length > max) { var cut = max; for (var i = max - 1; i > 0; i--) if (/[.؟!]$/.test(parts[i])) { cut = i + 1; break; } parts = parts.slice(0, cut); }
+    if (parts.length) parts[parts.length - 1] = parts[parts.length - 1].replace(/[،؛:]$/, '.');
+    return parts;
+  }
+  var saidEl = null;
+  function speak(html, asked, max) {
     if ((!asked && RE.state.voice === false) || !canSpeak()) return;
-    var s = plain(RE.g(String(html))).slice(0, 400), parts = breaths(s); if (!parts.length) return;
+    var parts = ear(html, max || 5); if (!parts.length) return;
+    if (!saidEl) { saidEl = el('div', { id: 'said', hidden: '' }); document.body.appendChild(saidEl); }
+    saidEl.textContent = parts.join('\n');
     try {
       if (native && native.speak) { native.speak(parts.join('\n')); return; }
       synth.cancel();
@@ -169,13 +203,15 @@
     var name = RE.state.name ? ' يا ' + RE.state.name : '';
     if (kind === 'screen') {
       hush();
-      if (d.n === 0 && !opened[d.station.id]) { opened[d.station.id] = 1; speak('محطّة ' + RE.g(d.station.title).replace(/`/g, '') + '. نبدأ بكلماتها.'); }
-    } else if (kind === 'hint') speak(d.text);
-    else if (kind === 'wrong') { if (d.special) speak(d.special); else if (d.tries === 1) speak(d.text); else if (d.tries === 2) speak('خذ[ي] تلميحاً، ثمّ جرّب[ي] من جديد.'); }
+      if (d.n === 0 && !opened[d.station.id]) { opened[d.station.id] = 1; speak('محطّة: ' + RE.g(d.station.title).replace(/`/g, '') + '. نبدأ بكلماتها.'); }
+    } else if (kind === 'hint') speak(d.say || d.text, false, 3);
+    else if (kind === 'wrong') { if (d.special) speak(d.special, false, 3); else if (d.tries === 1) speak(d.text, false, 2); else if (d.tries === 2) speak('خذ[ي] تلميحاً. ثمّ جرّب[ي] من جديد.'); }
     else if (kind === 'ok') {
-      if (d.shown) speak('الجواب الصحيح هو ' + d.answer + '. ' + (d.explain || ''));
-      else if (d.clean) { var c = RE.state.combo || 0; speak(d.msg + (c && c % 5 === 0 ? ' ' + c + ' على التوالي' + name + '!' : '')); }
-      else speak(d.msg + ' ' + (d.explain || ''));
+      /* a clean answer gets a word and no more; the reason is said only where there was a stumble */
+      var why = d.say || d.explain || '';
+      if (d.shown) speak('الجواب الصحيح: ' + d.answer + '. ' + why, false, 4);
+      else if (d.clean) { var c = RE.state.combo || 0; speak(d.msg + (c && c % 5 === 0 ? '. ' + c + ' على التوالي' + name + '!' : '')); }
+      else speak(d.msg + '. ' + why, false, 3);
     } else if (kind === 'end') speak('أتممت[ِ] المحطّة. أحسنت[ِ]' + name + '!');
   };
   /* the button in the top bar: with her voice, or leading alone with the buttons */
@@ -228,7 +264,7 @@
     }
     return { say: 'هذا لا أعرفه. أعرف الأعداد (القواسم، المضاعفات، الأعداد الأوّليّة) وكلمات دروسك. إن كنت[ِ] [تعرفين|تعرف] الجواب فعلّم[ي]ني إيّاه، وسأحفظه.', miss: true, q: s };
   }
-  RE.aicha = { ask: ask, speak: speak, hush: hush, canSpeak: canSpeak, search: search, toCode: toCode,
+  RE.aicha = { ask: ask, ear: ear, speak: speak, hush: hush, canSpeak: canSpeak, search: search, toCode: toCode,
     teach: function (q, a) { (RE.state.kb = RE.state.kb || []).push({ q: q, a: a, day: RE.today() }); RE.save(); } };
 
   /* ---------------- translation challenges ----------------
@@ -276,7 +312,7 @@
       var tb = el('button', { class: 'choice', type: 'button' }, RE.g('علّم[ي]ني الجواب'));
       tb.addEventListener('click', function () { opts.teach(a.q, body, tb); }); body.appendChild(tb);
     }
-    if (canSpeak()) { var hear = el('button', { class: 'hear', type: 'button', 'aria-label': 'اسمع[ي] الجواب'.replace('[ي]', RE.state.fem ? 'ي' : '') }, '🔊'); hear.addEventListener('click', function () { speak(a.say, true); }); body.appendChild(hear); }
+    if (canSpeak()) { var hear = el('button', { class: 'hear', type: 'button', 'aria-label': 'اسمع[ي] الجواب'.replace('[ي]', RE.state.fem ? 'ي' : '') }, '🔊'); hear.addEventListener('click', function () { speak(a.voice || a.say, true, 6); }); body.appendChild(hear); }
     thread.scrollTop = thread.scrollHeight;
     return body;
   }
@@ -424,8 +460,9 @@
     if (RE.isTv) w.classList.add('tv-own', 'tvlab');
     var head = el('div', { class: 'hello aicha-head' }, '<span class="face big">' + SPARK + '</span><div><h1>' + (code ? 'سطر الحاسوب' : mode === 'voice' ? 'صوت عَايْشَه' : tr ? 'تحدّيات السطور' : 'المختبر مع عَايْشَه') + '</h1><p>' +
       RE.t(code ? 'هذا السطر يسأل الحاسوب السؤال نفسه الذي في تمرينك. لا شيء مطلوب هنا: غيّر[ي] عدداً إن شئت[ِ]، وتوقّع[ي] الجواب قبل أن [تنفّذي|تنفّذ].' : tr ? 'لمن [تحبّ|يحبّ] أن [تجرّب|يجرّب]: سؤال بالعربيّة، [تركّبين|تركّب] سطره قطعة قطعة.' : 'هنا عَايْشَه تحسب وأنت[ِ] [تسألين|تسأل]. انظر[ي] إلى الجواب، ثمّ اسأل[ي]: لماذا؟ وماذا لو غيّرتُ العدد؟') + '</p></div>');
-    w.appendChild(head);
+    if (!RE.isTv) w.appendChild(head);
     var tabs = el('div', { class: 'steps labtabs' });
+    if (RE.isTv && (code || tr || mode === 'voice')) tabs.appendChild(el('b', { class: 'labname' }, code ? 'سطر الحاسوب' : tr ? 'تحدّيات السطور' : 'صوت عَايْشَه'));
     if (st) tabs.appendChild(el('a', { href: '#/s/' + st.id }, RE.state.fem ? '→ عودي إلى الدرس' : '→ عُد إلى الدرس'));
     if (tr || code || mode === 'voice') tabs.appendChild(el('a', { href: '#/lab' }, '→ المختبر'));
     else if (canSpeak()) tabs.appendChild(el('a', { href: '#/lab/voice' }, '🎙 صوت عَايْشَه'));

@@ -167,7 +167,7 @@
     var st = el('div', { class: 'stage' }), top = el('div', { class: 'stage-top' }), panes = el('div', { class: 'panes' }), bot = el('div', { class: 'stage-bot' });
     top.appendChild(el('a', { class: 'back', href: c.exit || '#/', 'aria-label': 'الرجوع إلى الطريق' }, '→ الطريق'));
     top.appendChild(el('div', { class: 'stage-title' }, (c.icon || '') + '<b>' + c.title + '</b>'));
-    if (c.pills) { var pills = el('div', { class: 'steps' }); c.pills.forEach(function (p) { pills.appendChild(el('a', { href: c.href(p.at), class: (!isEnd && sl.beat === p.beat ? 'on ' : '') + (p.seen ? 'seen' : ''), tabindex: RE.isTv ? -1 : 0 }, p.label)); }); top.appendChild(pills); }
+    if (c.pills) { var pills = el('div', { class: 'steps' }); c.pills.forEach(function (p) { pills.appendChild(el('a', { href: c.href(p.at), class: (!isEnd && sl.beat === p.beat ? 'on ' : '') + (p.seen ? 'seen' : '') }, p.label)); }); top.appendChild(pills); }
     if (c.aicha) top.appendChild(el('a', { class: 'back aicha-btn', href: c.aicha, 'aria-label': 'اسألي عَايْشَه' }, RE.aichaFace + ' عَايْشَه'));
     top.appendChild(el('div', { class: 'stage-stars', title: 'نجومي' }, '★ <span data-stars>' + RE.totalStars() + '</span>'));
     st.appendChild(top);
@@ -182,13 +182,15 @@
       if (kindLabel) text.appendChild(el('div', { class: 'slide-head' }, kindLabel));
       sl.text.forEach(function (b) { text.appendChild(textBlock(b)); });
       var m = sl.main, figHost = sl.fig ? figEl(sl.fig, c.key) : null;
+      /* what the drawing shows, when it is one drawing whose numbers may be played with (play.js) */
+      var pv = sl.fig && sl.fig.viz && !Array.isArray(sl.fig.viz) && sl.fig.viz !== 'keep' ? sl.fig.viz : null;
       if (!m) ready(false);
       else if (m.t === 'q') {
         var fresh = !!c.fresh;
         if (fresh) { var rr = RE.rec(m.id); rr.tries = 0; rr.hints = 0; rr.shown = false; }
         var done0 = !fresh && RE.rec(m.id).ok;
         var qb = RE.question(m, { fresh: fresh, label: (sl.label || '') + (m.src ? (sl.label ? ' · ' : '') + srcLabel(m.src) : ''),
-          onDone: function () { fig.classList.add('solved'); ready(true); if (c.onSolve) c.onSolve(sl, n); },
+          onDone: function () { fig.classList.add('solved'); ready(true); if (RE.play && pv && figHost) RE.play(fig, pv, figHost); if (c.onSolve) c.onSolve(sl, n); },
           onWrong: function (bad) { if (RE.isTv && bad) setTimeout(function () { bad.focus({ preventScroll: true }); }, 60); } });
         text.appendChild(qb);
         if (done0) { ready(false); fig.classList.add('solved'); }
@@ -199,9 +201,11 @@
         text.appendChild(el('h2', {}, 'كلمات هذه المحطّة')); text.appendChild(el('p', { class: 'muted' }, RE.g('المس[ي] كلّ كلمة لتر[ي|ى] رسمها.')));
         var list = el('div', { class: 'terms' }), showTerm = function (i, btn) {
           [].forEach.call(list.children, function (x) { x.classList.toggle('on', x === btn); });
-          figHost.innerHTML = ''; if (m.items[i].viz) figHost.appendChild(RE.viz(m.items[i].viz));
+          figHost.innerHTML = ''; if (m.items[i].viz) { var tf = RE.viz(m.items[i].viz); figHost.appendChild(tf); if (RE.play) RE.play(null, m.items[i].viz, tf); }
           def.innerHTML = '<b>' + t(m.items[i].w) + '</b>' + t(m.items[i].d);
         }, def = el('div', { class: 'term-def', 'aria-live': 'polite' });
+        /* every meaning, so that the box is given once the room of the longest and never moves the screen (tv.js) */
+        def._all = m.items.map(function (it) { return '<b>' + t(it.w) + '</b>' + t(it.d); });
         m.items.forEach(function (it, i) {
           var b = el('button', { type: 'button', class: 'term' }, '<b>' + t(it.w) + '</b><span>' + t(it.d) + '</span>');
           b.addEventListener('focus', function () { showTerm(i, b); }); b.addEventListener('click', function () { showTerm(i, b); RE.fx('tap'); });
@@ -215,6 +219,7 @@
         text.appendChild(us); ready(false);
       }
       if (figHost) fig.appendChild(figHost); else st.classList.add('solo');
+      if (figHost && RE.play && pv && (!m || m.t !== 'q' || fig.classList.contains('solved'))) RE.play(fig, pv, figHost);
     }
     panes.appendChild(text); if (!st.classList.contains('solo')) panes.appendChild(fig);
     st.appendChild(panes);
@@ -358,9 +363,9 @@
     ex.addEventListener('click', function () { var a = el('a', { href: URL.createObjectURL(new Blob([JSON.stringify(RE.state, null, 1)], { type: 'application/json' })), download: 'rawnaq-ed-' + RE.today() + '.json' }); document.body.appendChild(a); a.click(); a.remove(); });
     var im = el('input', { type: 'file', accept: '.json,application/json', hidden: '' }), imb = el('button', { class: 'btn small white', type: 'button' }, 'استرجاع نسخة');
     imb.addEventListener('click', function () { im.click(); });
-    im.addEventListener('change', function () { var f = im.files[0]; if (!f) return; var rd = new FileReader(); rd.onload = function () { try { var d = JSON.parse(rd.result); if (d && d.q) { RE.state = d; RE.save(); RE.load(); guardian(); } } catch (e) { alert('ملفّ غير صالح.'); } }; rd.readAsText(f); });
+    im.addEventListener('change', function () { var f = im.files[0]; if (!f) return; var rd = new FileReader(); rd.onload = function () { try { var d = JSON.parse(rd.result); if (d && d.q) { RE.state = d; RE.save(); RE.load(); guardian(); } } catch (e) { RE.confirm('هذا الملفّ ليس نسخة محفوظة من رونق.', null, 'حسناً'); } }; rd.readAsText(f); });
     var rs = el('button', { class: 'btn small white', type: 'button', style: 'color:#E8443A' }, 'البدء من جديد');
-    rs.addEventListener('click', function () { if (confirm('يُمحى كلّ التقدّم المحفوظ على هذا الجهاز. هل أنت متأكّد؟')) { RE.reset(); guardian(); } });
+    rs.addEventListener('click', function () { RE.confirm('يُمحى كلّ التقدّم المحفوظ على هذا الجهاز: النجوم والأوسمة والدفتر. لا رجوع بعد ذلك.', 'امسح كلّ شيء', 'لا، أبقِه', function () { RE.reset(); guardian(); }); });
     var r0 = el('div', { class: 'row', style: 'margin-top:14px' });
     [['snd', 'أصوات الأجوبة'], ['mus', 'موسيقى هادئة في الخلفيّة']].forEach(function (x) {
       var lb = el('label', { class: 'check' }), cb = el('input', { type: 'checkbox' }); cb.checked = RE.state[x[0]] !== false;

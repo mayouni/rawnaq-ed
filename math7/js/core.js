@@ -246,7 +246,7 @@
       say('ok', '<span class="stars" aria-label="' + stars + ' نجوم">' + '★★★'.slice(0, stars) + '<i>' + '★★★'.slice(stars) + '</i></span> ' + msg + (q.explain ? '<br>' + q.explain : ''));
       box.classList.add('done');
       if (!opts.practiceOnly) { RE.settle(q.id, clean); if (RE.fx) RE.fx(r.shown ? 'show' : 'ok', { clean: clean, stars: stars, el: fb }); }
-      if (!opts.practiceOnly && RE.coach) RE.coach('ok', { clean: clean, shown: r.shown, msg: msg, explain: q.explain, answer: q.choices && !multi ? q.choices[q.answer] : inputs.map(function (i) { return i.value; }).join(' ; ') });
+      if (!opts.practiceOnly && RE.coach) RE.coach('ok', { clean: clean, shown: r.shown, msg: msg, explain: q.explain, say: q.say && q.say.explain, answer: q.choices && !multi ? q.choices[q.answer] : inputs.map(function (i) { return i.value; }).join(' ; ') });
       if (RE.afterAnswer) RE.afterAnswer(q, fb);
       if (opts.onDone) opts.onDone(clean);
     }
@@ -286,7 +286,7 @@
     inputs.forEach(function (i) { i.addEventListener('keydown', function (e) { if (e.key === 'Enter' && i.tagName === 'INPUT') check(); }); i.addEventListener('input', function () { i.classList.remove('ok', 'no'); }); });
     hintBtn.addEventListener('click', function () {
       if (RE.fx) RE.fx('hint');
-      if (hintAt < q.hints.length) { r.hints++; RE.save(); say('hint', '<b>تلميح ' + (hintAt + 1) + ':</b> ' + q.hints[hintAt]); if (RE.coach) RE.coach('hint', { text: q.hints[hintAt] }); hintAt++; }
+      if (hintAt < q.hints.length) { r.hints++; RE.save(); say('hint', '<b>تلميح ' + (hintAt + 1) + ':</b> ' + q.hints[hintAt]); if (RE.coach) RE.coach('hint', { text: q.hints[hintAt], say: q.say && q.say.hints && q.say.hints[hintAt] }); hintAt++; }
       if (hintAt >= q.hints.length) { hintBtn.hidden = true; showBtn.hidden = false; }
     });
     showBtn.addEventListener('click', function () {

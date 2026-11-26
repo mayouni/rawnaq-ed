@@ -44,7 +44,22 @@
   RE.toast = function (html, cls) {
     if (!toastHost) { toastHost = el('div', { class: 'toasts', 'aria-live': 'polite' }); document.body.appendChild(toastHost); }
     var t = el('div', { class: 'toast ' + (cls || '') }, html); toastHost.appendChild(t);
-    setTimeout(function () { t.classList.add('out'); setTimeout(function () { t.remove(); }, 500); }, 3600);
+    /* it stays long enough to be read: the longer the words, the longer the stay */
+    var stay = Math.max(cls === 'badge' ? 6500 : 4200, t.textContent.length * 95);
+    setTimeout(function () { t.classList.add('out'); setTimeout(function () { t.remove(); }, 500); }, stay);
+  };
+  /* a question that needs a yes: Rawnaq's own window, never the browser's. The safe answer holds the focus,
+     the back key and Escape mean «no», and the focus returns to where it stood (Zayn: «The Right to Leave»). */
+  RE.confirm = function (html, yes, no, then) {
+    var from = document.activeElement, m = el('div', { class: 'rq-modal', role: 'dialog', 'aria-modal': 'true' }), box = el('div', { class: 'rq-box' }, '<p>' + html + '</p>'), row = el('div', { class: 'rq-row' });
+    var n = el('button', { class: 'btn white', type: 'button' }, no || 'لا'), y = yes ? el('button', { class: 'btn sun', type: 'button' }, yes) : null;
+    function close(ok) { m.remove(); document.removeEventListener('keydown', esc, true); if (from && from.focus && document.body.contains(from)) from.focus({ preventScroll: true }); if (ok && then) then(); }
+    function esc(e) { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(false); } }
+    n.addEventListener('click', function () { close(false); }); if (y) y.addEventListener('click', function () { close(true); });
+    row.appendChild(n); if (y) row.appendChild(y); box.appendChild(row); m.appendChild(box); document.body.appendChild(m);
+    m.addEventListener('click', function (e) { if (e.target === m) close(false); });
+    document.addEventListener('keydown', esc, true); m._close = function () { close(false); };
+    setTimeout(function () { n.focus({ preventScroll: true }); }, 30);
   };
   RE.confetti = function (n) {
     try { if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; } catch (e) { /* draw it */ }
