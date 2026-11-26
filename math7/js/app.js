@@ -28,17 +28,17 @@
     if (due.length) head.appendChild(el('a', { class: 'btn sun', href: '#/review' }, 'مراجعة اليوم · <span class="m">' + due.length + '</span>'));
     w.appendChild(head);
     var detail = el('div', { class: 'card tvdetail' });
-    function show(s) { var st = RE.stationStats(s); detail.innerHTML = icon(s, 76) + '<div><h2>' + t(s.title) + '</h2><p>' + t(s.question) + '</p><span class="muted">كتابك، ص ' + pg(s.pages) + ' · حُلّ <span class="m">' + st.done + ' / ' + st.total + '</span></span></div>'; }
+    function show(s) { var st = RE.stationStats(s); detail.style.zoom = 1; detail.innerHTML = icon(s, 76) + '<div><h2>' + t(s.title) + '</h2><p>' + t(s.question) + '</p><span class="muted">كتابك، ص ' + pg(s.pages) + ' · حُلّ <span class="m">' + st.done + ' / ' + st.total + '</span></span></div>'; if (RE.tvBox) RE.tvBox(detail); }
     RE.units.forEach(function (u) {
-      w.appendChild(el('div', { class: 'tvrow-title' }, '<span class="num">' + u.num + '</span> ' + u.title));
+      var unit = el('div', { class: 'tvunit' }); unit.appendChild(el('div', { class: 'tvrow-title' }, '<span class="num">' + u.num + '</span>' + u.title.replace(/^[^:]*:\s*/, '')));
       var row = el('div', { class: 'tiles-row' });
       all.filter(function (s) { return (s.unit || 'n') === u.id; }).forEach(function (s) {
         var a = el('a', { class: 'station tile' + (complete(s) ? ' done' : s === next ? ' next' : ''), href: '#/s/' + s.id, 'aria-label': RE.g(s.title).replace(/`/g, '') }, icon(s, 44) + '<span class="tn">' + t(s.title).replace(/:.*$/, '') + '</span>');
         a.addEventListener('focus', function () { show(s); }); row.appendChild(a);
       });
-      w.appendChild(row);
+      unit.appendChild(row); w.appendChild(unit);
     });
-    w.appendChild(detail); show(next || all[0]);
+    w.appendChild(detail); show(next || all[0]); setTimeout(function () { if (RE.tvBox) RE.tvBox(detail); }, 0);
   }
   function home() {
     if (RE.isTv) return tvHome();

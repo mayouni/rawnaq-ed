@@ -131,12 +131,29 @@
     return String(html).replace(/<br>/g, '. ').replace(/<[^>]+>/g, ' ').replace(/[\[\]{}`⁦⁩]/g, ' ').replace(/×/g, ' في ').replace(/\^/g, ' أسّ ').replace(/=/g, ' يساوي ').replace(/;/g, '، ')
       .replace(/\bTRUE\b/g, 'نعم').replace(/\bFALSE\b/g, 'لا').replace(/[A-Za-z_.()]+/g, ' ').replace(/\s+/g, ' ').trim();
   }
+  /* her voice, as the learner chose it: which of the device's Arabic voices, how fast, how high */
+  var RATES = [['هادئة', 0.78], ['عاديّة', 0.92], ['سريعة', 1.08]], PITCHES = [['غليظة', 0.82], ['عاديّة', 1], ['رفيعة', 1.22]];
+  function voiceList() {
+    try { if (native && native.voices) return String(native.voices()).split('\n').filter(Boolean); } catch (e) { return []; }
+    try { return (synth.getVoices() || []).filter(function (v) { return /^ar/i.test(v.lang); }).map(function (v) { return v.name; }); } catch (e2) { return []; }
+  }
+  function applyVoice() {
+    var st = RE.state, rate = st.vRate || 0.92, pitch = st.vPitch || 1;
+    try {
+      if (native && native.setRate) { native.setRate(rate); native.setPitch(pitch); if (st.vName) native.setVoice(st.vName); }
+      else if (synth && st.vName) { var v = (synth.getVoices() || []).filter(function (x) { return x.name === st.vName; })[0]; if (v) arVoice = v; }
+    } catch (e) { /* the default voice stays */ }
+  }
+  /* one line is one breath. The sentence is cut at every stop, and each part is said on its own, with a short
+     silence before the next: this is what makes the reading sound like a person and not like a list. */
+  function breaths(s) { return s.replace(/\s*([.،؛:؟!…])\s+/g, '$1\n').split('\n').map(function (x) { return x.trim(); }).filter(function (x) { return x && !/^[.،؛:؟!…]+$/.test(x); }); }
   function speak(html, asked) {
     if ((!asked && RE.state.voice === false) || !canSpeak()) return;
-    var s = plain(RE.g(String(html))).slice(0, 400); if (!s) return;
+    var s = plain(RE.g(String(html))).slice(0, 400), parts = breaths(s); if (!parts.length) return;
     try {
-      if (native && native.speak) { native.speak(s); return; }
-      synth.cancel(); var u = new SpeechSynthesisUtterance(s); u.voice = arVoice; u.lang = arVoice.lang; u.rate = 0.92; synth.speak(u);
+      if (native && native.speak) { native.speak(parts.join('\n')); return; }
+      synth.cancel();
+      parts.forEach(function (p) { var u = new SpeechSynthesisUtterance(p); u.voice = arVoice; u.lang = arVoice.lang; u.rate = RE.state.vRate || 0.92; u.pitch = RE.state.vPitch || 1; synth.speak(u); });
     } catch (e) { /* silent: the text is on the screen */ }
   }
   function hush() { try { if (native && native.hush) native.hush(); else if (synth) synth.cancel(); } catch (e) { /* nothing to stop */ } }
@@ -168,7 +185,7 @@
     if (!b._wired) { b._wired = true; b.addEventListener('click', function () { RE.state.voice = RE.state.voice === false; RE.save(); hush(); RE.syncVoice(); if (RE.state.voice) speak('أنا معك[ِ].'); else if (RE.toast) RE.toast('عَايْشَه صامتة الآن. الأزرار بين يديك.'); }); }
   };
   window.addEventListener('hashchange', function () { setTimeout(RE.syncVoice, 60); });
-  window.addEventListener('load', function () { setTimeout(RE.syncVoice, 400); setTimeout(RE.syncVoice, 2500); setTimeout(RE.syncVoice, 7000); });
+  window.addEventListener('load', function () { setTimeout(applyVoice, 3000); setTimeout(applyVoice, 8000); setTimeout(RE.syncVoice, 400); setTimeout(RE.syncVoice, 2500); setTimeout(RE.syncVoice, 7000); });
 
   /* ---------------- the line that mirrors an answer ----------------
      When an exercise is solved, the computer's way of asking the same thing is shown under it, as one line.
@@ -379,19 +396,42 @@
     card.appendChild(lineEl); card.appendChild(acts); card.appendChild(fb); w.appendChild(card); run();
   }
 
+  function voicePage(w) {
+    var card = el('div', { class: 'card aicha voicecard' }), sample = 'أهلاً' + (RE.state.name ? ' يا ' + RE.state.name : '') + '. أنا عَايْشَه، وأنا معك[ِ]. هل نبدأ؟';
+    function row(title, items, isOn, pick) {
+      var r = el('div', { class: 'vrow' }, '<b>' + title + '</b>'), box = el('div', { class: 'choices' });
+      items.forEach(function (it, i) {
+        var b = el('button', { class: 'choice' + (isOn(it, i) ? ' sel' : ''), type: 'button' }, it[0]);
+        b.addEventListener('click', function () { pick(it, i); RE.save(); applyVoice(); [].forEach.call(box.children, function (x) { x.classList.toggle('sel', x === b); }); setTimeout(function () { speak(sample, true); }, 120); });
+        box.appendChild(b);
+      });
+      r.appendChild(box); card.appendChild(r);
+    }
+    var names = voiceList();
+    if (names.length > 1) row('الصوت', names.slice(0, 8).map(function (n, i) { return ['صوت ' + (i + 1), n]; }), function (it, i) { return RE.state.vName ? RE.state.vName === it[1] : i === 0; }, function (it) { RE.state.vName = it[1]; });
+    row('السرعة', RATES, function (it) { return (RE.state.vRate || 0.92) === it[1]; }, function (it) { RE.state.vRate = it[1]; });
+    row('النبرة', PITCHES, function (it) { return (RE.state.vPitch || 1) === it[1]; }, function (it) { RE.state.vPitch = it[1]; });
+    row('المرافقة', [['عَايْشَه تتكلّم', true], ['أقود وحدي بالأزرار', false]], function (it) { return (RE.state.voice !== false) === it[1]; }, function (it) { RE.state.voice = it[1]; RE.syncVoice(); });
+    var hear = el('button', { class: 'btn', type: 'button' }, '🔊 ' + (RE.state.fem ? 'اسمعي' : 'اسمع')); hear.addEventListener('click', function () { speak(sample, true); });
+    var acts = el('div', { class: 'cmdline' }); acts.appendChild(hear); card.appendChild(acts);
+    w.appendChild(card);
+  }
+
   /* #/lab  #/lab/s/<stationId>  #/lab/code/<line>  (#/lab/translate: the building challenges, for the curious) */
   RE.labPage = function (w, mode, arg) {
     var st = mode === 's' ? (RE.stations || []).filter(function (s) { return s.id === arg; })[0] : null, tr = mode === 'translate';
     var code = mode === 'code';
     if (RE.isTv) w.classList.add('tv-own', 'tvlab');
-    var head = el('div', { class: 'hello aicha-head' }, '<span class="face big">' + SPARK + '</span><div><h1>' + (code ? 'سطر الحاسوب' : tr ? 'تحدّيات السطور' : 'المختبر مع عَايْشَه') + '</h1><p>' +
+    var head = el('div', { class: 'hello aicha-head' }, '<span class="face big">' + SPARK + '</span><div><h1>' + (code ? 'سطر الحاسوب' : mode === 'voice' ? 'صوت عَايْشَه' : tr ? 'تحدّيات السطور' : 'المختبر مع عَايْشَه') + '</h1><p>' +
       RE.t(code ? 'هذا السطر يسأل الحاسوب السؤال نفسه الذي في تمرينك. لا شيء مطلوب هنا: غيّر[ي] عدداً إن شئت[ِ]، وتوقّع[ي] الجواب قبل أن [تنفّذي|تنفّذ].' : tr ? 'لمن [تحبّ|يحبّ] أن [تجرّب|يجرّب]: سؤال بالعربيّة، [تركّبين|تركّب] سطره قطعة قطعة.' : 'هنا عَايْشَه تحسب وأنت[ِ] [تسألين|تسأل]. انظر[ي] إلى الجواب، ثمّ اسأل[ي]: لماذا؟ وماذا لو غيّرتُ العدد؟') + '</p></div>');
     w.appendChild(head);
     var tabs = el('div', { class: 'steps labtabs' });
     if (st) tabs.appendChild(el('a', { href: '#/s/' + st.id }, RE.state.fem ? '→ عودي إلى الدرس' : '→ عُد إلى الدرس'));
-    if (tr || code) tabs.appendChild(el('a', { href: '#/lab' }, '→ المختبر'));
+    if (tr || code || mode === 'voice') tabs.appendChild(el('a', { href: '#/lab' }, '→ المختبر'));
+    else if (canSpeak()) tabs.appendChild(el('a', { href: '#/lab/voice' }, '🎙 صوت عَايْشَه'));
     if (tabs.children.length) w.appendChild(tabs);
     if (code) { codeWindow(w, decodeURIComponent(arg || '')); return; }
+    if (mode === 'voice') { voicePage(w); return; }
     if (tr) translate(w); else talk(w, st);
     if (!tr && !RE.isTv) {
       var ideas = el('div', { class: 'card tint' }, '<h3>أسئلة تستحقّ البحث</h3>');

@@ -93,6 +93,12 @@
   /* a lesson screen has nowhere to scroll to: if anything moves it, it is put back */
   document.addEventListener('scroll', function (e) { var x = e.target; if (x && x.classList && (x.classList.contains('stage') || x.classList.contains('panes') || x.classList.contains('pane'))) { if (x.scrollLeft) x.scrollLeft = 0; if (x.scrollTop && !x.classList.contains('pane')) x.scrollTop = 0; } }, true);
 
+  /* a box whose words must stay inside it and away from its frame: drawn smaller until they do */
+  RE.tvBox = function (b) {
+    if (!b || !b.clientHeight) return;
+    for (var i = 0; i < STEPS.length; i++) { b.style.zoom = STEPS[i]; if (b.scrollHeight <= b.clientHeight + 1 && b.scrollWidth <= b.clientWidth + 1) break; }
+  };
+
   RE.tvFit = function () {
     var old = document.querySelector('.tvbar'); if (old) old.remove();
     if (document.body.classList.contains('in-stage')) { RE.tvStage(); return; }

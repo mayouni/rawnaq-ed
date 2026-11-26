@@ -437,3 +437,20 @@ html.tv :focus { outline: 4px solid var(--blue); outline-offset: 1px; box-shadow
 html.tv .cue:focus { outline: 3px solid var(--blue); outline-offset: 0; box-shadow: none !important; border-radius: 6px; }
 html.tv .tvlab .cmds .choice { font-size: 15px; padding: 0 12px; } html.tv .tvlab .cmds { gap: 6px; }
 html.tv body.pad-on .cuebar, html.tv body.pad-on .qbox .qn { display: none; }
+
+/* ---------- words stay away from the frame that holds them ---------- */
+.tvdetail { padding: 10px 22px !important; } .tvdetail > div { min-width: 0; flex: 1; } .tvdetail p, .tvdetail h2 { overflow-wrap: anywhere; white-space: normal; }
+.tvdetail .expr { white-space: normal; }
+html.tv .tiles-row { padding-bottom: 6px; } html.tv .station.tile { padding: 5px 4px 6px; }
+html.tv .card, html.tv .msg .body, html.tv .term-def, html.tv .say, html.tv .rule, html.tv .idea, html.tv .fb { overflow-wrap: anywhere; }
+html.tv .msg .body { padding: 8px 14px 10px; }
+.tvunit { display: flex; align-items: center; gap: 10px; }
+.tvunit .tvrow-title { flex: 0 0 92px; margin: 0; font-size: 13px; line-height: 1.5; text-align: center; } .tvunit .tvrow-title .num { display: block; width: 30px; margin: 0 auto 2px; font-size: 16px; }
+.tvunit .tiles-row { flex: 1; min-width: 0; }
+.tvdetail h2 { font-size: 23px; } .tvdetail p { font-size: 18px; } .tvdetail .ico { width: 72px; height: 72px; }
+
+/* ---------- her voice ---------- */
+.vrow { display: flex; align-items: center; gap: 14px; margin: 6px 0; flex-wrap: wrap; } .vrow b { flex: 0 0 90px; }
+html.tv .card.aicha.voicecard { display: block; }
+/* the sieve of a hundred numbers fits its half of a television */
+html.tv .grid100 { max-width: 292px; gap: 3px; } html.tv .grid100 button { font-size: 13px; border-radius: 6px; border-width: 1.5px; }
