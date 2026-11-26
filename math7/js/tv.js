@@ -31,12 +31,19 @@
       return out;
     }
     kids = [].slice.call(b.children);
+    /* a card that is a title and one long list or grid is cut inside that list */
+    var host = b, lead = null, last = kids[kids.length - 1];
+    if (kids.length && kids.length <= 2 && last.children.length > 3) { host = last; lead = kids.length === 2 ? kids[0] : null; kids = [].slice.call(host.children); }
     if (kids.length < 2) { b.style.maxHeight = room + 'px'; b.style.overflow = 'auto'; return [b]; }
-    var hs = kids.map(outer), pad = outer(b) - hs.reduce(function (s, h) { return s + h; }, 0), title = /^H\d$/.test(kids[0].tagName) ? kids[0] : null;
-    cur = shell(b); used = pad;
-    kids.forEach(function (k, j) {
-      if (used + hs[j] > (out.length ? room : firstRoom) && cur.children.length > (title && out.length === 0 ? 1 : 0)) { out.push(cur); cur = shell(b); used = pad; if (title) { cur.appendChild(title.cloneNode(true)); used += hs[0]; } }
-      cur.appendChild(k); used += hs[j];
+    /* things side by side (a grid) count as one row */
+    var rows = [], top = null;
+    kids.forEach(function (k) { if (top === null || Math.abs(k.offsetTop - top) > 4) { rows.push({ els: [], h: 0 }); top = k.offsetTop; } var r = rows[rows.length - 1]; r.els.push(k); r.h = Math.max(r.h, outer(k)); });
+    var body = rows.reduce(function (t, r) { return t + r.h; }, 0), chrome = Math.max(0, outer(b) - body), into;
+    function fresh() { var box = shell(b); into = box; if (host !== b) { if (lead) box.appendChild(out.length ? lead.cloneNode(true) : lead); into = shell(host); box.appendChild(into); } return box; }
+    cur = fresh(); used = chrome;
+    rows.forEach(function (r) {
+      if (used + r.h > (out.length ? room : firstRoom) && into.children.length) { out.push(cur); cur = fresh(); used = chrome; }
+      r.els.forEach(function (k) { into.appendChild(k); }); used += r.h;
     });
     out.push(cur); return out;
   }
@@ -54,7 +61,7 @@
     var queue = parts.slice(), b2;
     while ((b2 = queue.shift())) (function (b) {
       var h = outer(b), left = room - used;
-      if (cur && used + h > room && left > room * 0.4 && (b.querySelector('table') || b.children.length > 2)) {
+      if (cur && used + h > room && left > room * 0.4 && (b.querySelector('table') || b.children.length > 2 || (b.lastElementChild && b.lastElementChild.children.length > 3))) {
         var p = split(b, room, left);
         if (p.length > 1 && p[0] !== b) { p.forEach(function (x) { w.insertBefore(x, b); }); b.remove(); cur.appendChild(p[0]); used = room; queue = p.slice(1).concat(queue); return; }
       }
