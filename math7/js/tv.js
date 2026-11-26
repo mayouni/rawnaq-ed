@@ -48,9 +48,37 @@
     out.push(cur); return out;
   }
 
+  /* ---- a lesson screen ----
+     The half that holds the exercise never scrolls: when its content is taller than the half (a long statement,
+     the feedback after an answer, the pad open under it), the whole half is drawn a little smaller until it fits.
+     It is checked again whenever something appears in it. */
+  var STEPS = [1, 0.94, 0.88, 0.82, 0.76, 0.7, 0.64, 0.58], watching = null, obs = null, busy = false;
+  function fitPane(p, pad) {
+    if (!p) return;
+    var room = 0; if (pad && !pad.hidden && document.body.classList.contains('pad-on')) room = pad.offsetHeight + 6;
+    busy = true;
+    for (var i = 0; i < STEPS.length; i++) {
+      p.style.zoom = STEPS[i]; p.style.paddingBottom = room ? (room / STEPS[i]) + 'px' : '';
+      if (p.scrollHeight <= p.clientHeight + 2) break;
+    }
+    p.scrollTop = 0;
+    setTimeout(function () { busy = false; }, 0);
+  }
+  RE.tvStage = function () {
+    var p = document.querySelector('.stage .pane.text'); if (!p) return;
+    var pad = RE.pad && RE.pad.el ? RE.pad.el() : null;
+    fitPane(p, pad);
+    var f = document.querySelector('.stage .pane.fig'); if (f) { f.style.zoom = 1; for (var i = 0; i < STEPS.length && f.scrollHeight > f.clientHeight + 2; i++) f.style.zoom = STEPS[i]; }
+    if (watching !== p) {
+      if (obs) obs.disconnect();
+      watching = p; obs = new MutationObserver(function () { if (!busy) requestAnimationFrame(function () { fitPane(p, RE.pad && RE.pad.el ? RE.pad.el() : null); }); });
+      obs.observe(p, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'class'] });
+    }
+  };
+
   RE.tvFit = function () {
     var old = document.querySelector('.tvbar'); if (old) old.remove();
-    if (document.body.classList.contains('in-stage')) return;
+    if (document.body.classList.contains('in-stage')) { RE.tvStage(); return; }
     var w = document.querySelector('#app > .wrap, main > .wrap, .wrap.page') || [].filter.call(document.querySelectorAll('.wrap'), function (x) { return !x.closest('.top'); })[0];
     if (!w || w.classList.contains('tv-own') || w.querySelector('.tv-screen')) return;
     var key = location.hash, room = window.innerHeight - w.getBoundingClientRect().top - 58;

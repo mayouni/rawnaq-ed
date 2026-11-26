@@ -200,13 +200,14 @@
         var list = el('div', { class: 'terms' }), showTerm = function (i, btn) {
           [].forEach.call(list.children, function (x) { x.classList.toggle('on', x === btn); });
           figHost.innerHTML = ''; if (m.items[i].viz) figHost.appendChild(RE.viz(m.items[i].viz));
-        };
+          def.innerHTML = '<b>' + t(m.items[i].w) + '</b>' + t(m.items[i].d);
+        }, def = el('div', { class: 'term-def', 'aria-live': 'polite' });
         m.items.forEach(function (it, i) {
           var b = el('button', { type: 'button', class: 'term' }, '<b>' + t(it.w) + '</b><span>' + t(it.d) + '</span>');
           b.addEventListener('focus', function () { showTerm(i, b); }); b.addEventListener('click', function () { showTerm(i, b); RE.fx('tap'); });
           list.appendChild(b);
         });
-        text.appendChild(list); showTerm(0, list.firstChild); ready(false);
+        text.appendChild(list); text.appendChild(def); showTerm(0, list.firstChild); ready(false);
       } else if (m.t === 'idea') { text.appendChild(el('h2', {}, 'الفكرة الكبرى')); text.appendChild(el('div', { class: 'idea' }, t(m.html))); ready(false); }
       else if (m.t === 'uses') {
         text.appendChild(el('h2', {}, 'أين نجدها في الحياة؟'));

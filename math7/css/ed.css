@@ -389,3 +389,26 @@ html.tv .card.aicha .cmdline { flex-wrap: wrap; margin-top: 4px; } html.tv .card
 html.tv .card.aicha .cmdline .slot { flex: 1; min-height: 44px; }
 .station.tile .tn { font-family: "Readex Pro", "Noto Kufi Arabic", sans-serif !important; font-size: 12px; }
 .tvdetail .ico { width: 60px; height: 60px; flex: none; } .tvdetail h2 { font-size: 21px; line-height: 1.4; } .tvdetail p { font-size: 17px; line-height: 1.5; } .tvdetail .muted { font-size: 14px; }
+
+/* ---------- a lesson screen on a television: nothing scrolls ---------- */
+.term-def { display: none; }
+html.tv .stage .pane { overflow: hidden; }
+html.tv .stage .pane.text { padding: 10px 18px; }
+html.tv .stage .qt { line-height: 1.95; } html.tv .stage .qbox .qt { margin-bottom: 6px; }
+html.tv .stage .pane.text h2 { font-size: 21px; margin: 0 0 6px; } html.tv .stage .pane.text p { margin: 0 0 6px; }
+html.tv .stage .say, html.tv .stage .rule { padding: 8px 14px; margin-bottom: 10px; }
+html.tv .stage .fb { margin-top: 6px; padding: 5px 12px; font-size: 16px; line-height: 1.6; }
+html.tv .stage .qactions { margin-top: 4px; }
+html.tv body.pad-on .pane.text { padding-bottom: 0; }
+html.tv .pad { padding: 5px 8px 6px; } html.tv .pad-key { height: 34px; font-size: 20px; } html.tv .pad-row { margin-bottom: 4px; gap: 5px; }
+html.tv .pad-prev { min-height: 28px; line-height: 28px; font-size: 19px; margin-bottom: 4px; } html.tv .pad-note { font-size: 12px; line-height: 1.2; }
+/* the words of a station: keys in a row, the meaning of the chosen one below */
+html.tv .terms { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+html.tv .term { padding: 2px 14px; } html.tv .term span { display: none; } html.tv .term b { font-size: 16px; }
+html.tv .term-def { display: block; margin-top: 12px; background: var(--soft-sun); border: var(--line) solid var(--ink); border-radius: 16px; padding: 10px 16px; line-height: 1.8; }
+html.tv .term-def b { display: block; font-size: 1.1em; }
+html.tv .stage .pane.text > .muted { display: none; }
+/* a screen with no drawing keeps its lines short */
+html.tv .stage.solo .pane.text { max-width: 780px; }
+html.tv .uses { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; } html.tv .use { padding: 8px 10px; } html.tv .use-ico { font-size: 38px; } html.tv .use p { font-size: 15px; line-height: 1.6; }
+html.tv .idea { padding: 10px 16px; }

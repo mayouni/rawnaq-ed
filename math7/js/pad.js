@@ -52,12 +52,13 @@
     target = slot; fill(slot.getAttribute('data-spec') || '');
     pad.hidden = false; document.body.classList.add('pad-on'); slot.classList.add('typing'); show();
     slot.dispatchEvent(new CustomEvent('re-blank', { detail: (slot._q ? slot._q.inputs.indexOf(slot) : 0), bubbles: true }));
-    setTimeout(function () { if (target === slot) slot.scrollIntoView({ block: 'center', inline: 'nearest' }); }, 20);
+    if (!RE.isTv) setTimeout(function () { if (target === slot) slot.scrollIntoView({ block: 'center', inline: 'nearest' }); }, 20);
+    if (RE.tvStage) RE.tvStage();
     if (RE.isTv) { var k = pad.querySelector('[data-k="3"]'); if (k) k.focus({ preventScroll: true }); }
   }
   function close() {
     if (!pad || pad.hidden) return null;
-    pad.hidden = true; document.body.classList.remove('pad-on');
+    pad.hidden = true; document.body.classList.remove('pad-on'); if (RE.tvStage) setTimeout(RE.tvStage, 0);
     var t = target; target = null;
     if (t) t.classList.remove('typing');
     return t;
